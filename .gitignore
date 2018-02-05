@@ -68,3 +68,7 @@ fabric.properties
 
 
 # End of https://www.gitignore.io/api/phpstorm
+.idea/Dungeon-Crawler.iml
+.idea/modules.xml
+.idea/modules.xml
+.idea/vcs.xml
