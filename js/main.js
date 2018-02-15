@@ -17,14 +17,15 @@ window.onload = function() {
         game.camera.scale.y = 1;
         game.stage.smoothed = false;
 
+        // Knight sheet and atlas
+        game.load.atlas('knightSheet', 'assets/characters/Knight/Knight_spritesheetX3.png', 'assets/characters/Knight/Knight.json');
 
-        game.load.atlas('knightSheet', 'assets/characters/Knight/Knight_spritesheetX4.png', 'assets/characters/Knight/Knight.json');
+        // Slime sheet and atlas
+        game.load.atlas('slimeSheet', 'assets/ai/Slime/Slime_spritesheetX3.png', 'assets/ai/Slime/Slime.json');
 
-        game.load.spritesheet('knight_idle', 'assets/characters/Knight/Knight_idle.png', 32, 32, 2);
-        game.load.spritesheet('knight_walk', 'assets/characters/Knight/Knight_walk.png', 32, 32, 8);
 
-        this.game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
-        this.game.load.tilemap('level1', 'assets/tilesets/DungeonTest.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
+        game.load.tilemap('level1', 'assets/tilesets/DungeonTest.json', null, Phaser.Tilemap.TILED_JSON);
 
         game.time.advancedTiming = true;
     }
@@ -52,7 +53,8 @@ window.onload = function() {
         game.physics.arcade.enable(player);
         player.anchor.setTo(.5,.5);
         game.camera.follow(player);
-        player.body.setSize(45, 68, 27, 27);
+        //player.body.setSize(45, 68, 27, 27);
+        player.body.setSize(45, 10, 27, 86);
 
 
         //animation
