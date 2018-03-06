@@ -1,9 +1,23 @@
 //window.onload = function() {
 
     /* ====== global variable ====== */
-    var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick;
-    var isBusy = false;
-    var movementSpeed = 200;
+    var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, dpad, eSword, playerCurrentHealth;
+
+    // player variables
+    var isWalking = false;
+
+    var playerMovementSpeedMod = 1;
+    var playerMovementSpeedBase = 200;
+    var playerMovementSpeed = playerMovementSpeedMod * playerMovementSpeedBase;
+
+    var playerAttackSpeedMod = 1;
+    var playerAttackSpeedBase = 100;
+    var playerAttackSpeed = playerAttackSpeedMod * playerAttackSpeedBase;
+
+    var playerHealthMod = 1;
+    var playerHealthBase = 100;
+    var playerHealth = playerHealthMod * playerHealthBase;
+
 
     /* ====== create game object and canvas ====== */
     var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render:render });
@@ -42,6 +56,7 @@
         this.load.image('joystickBall', 'assets/ui/joystickBall.png');
         this.load.image('joystickBackground', 'assets/ui/joystickBackground.png');
         this.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
+        this.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
 
         // touch control
         game.input.addPointer();
@@ -76,6 +91,10 @@
         //player.body.setSize(45, 68, 27, 27);
         player.body.setSize(45, 55, 27, 41);
 
+        playerCurrentHealth = playerHealth;
+        console.log(playerHealth);
+        console.log(playerCurrentHealth);
+
         // player animation
         player.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
         player.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
@@ -86,6 +105,7 @@
         game.physics.arcade.enable(ai);
         ai.anchor.setTo(.5,.5);
         ai.body.setSize(45, 47, 27, 49);
+        //ai.damage = 30;
 
         // slim animation
         ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
@@ -111,8 +131,11 @@
         stick = pad.addStick(0, 0, 200, 'arcade');
         stick.alignBottomLeft();
 
+        dpad = pad.addDPad(0, 0, 200, 'dpad');
+        dpad.alignBottomRight(0);
 
-
+        // swords
+        //eSword = game.add.sprite(player.x, player.y);
 
     }
 
@@ -121,22 +144,22 @@
     function update() {
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, ai);
-        game.physics.arcade.overlap(ai, player, gameOver);
+        game.physics.arcade.overlap(player, ai, console.log("collision"));
         // reset players physics movement variable
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
-        isBusy = false;
+        isWalking = false;
 
         // check for inputss
-        if (keyLeft.isDown) 	{ player.body.velocity.x = -movementSpeed; player.scale.x = -1; player.animations.play('walk'); isBusy=true;}	// move left
-        if (keyRight.isDown) 	{ player.body.velocity.x = movementSpeed; player.scale.x = 1; player.animations.play('walk'); isBusy=true;}		// move right
-        if (keyUp.isDown) 		{ player.body.velocity.y = -movementSpeed; player.animations.play('walk'); isBusy=true;}	// move up
-        if (keyDown.isDown) 	{ player.body.velocity.y = movementSpeed; player.animations.play('walk'); isBusy=true;}		// move down
+        if (keyLeft.isDown) 	{ player.body.velocity.x = -playerMovementSpeed; player.scale.x = -1; player.animations.play('walk'); isBusy=true;}	// move left
+        if (keyRight.isDown) 	{ player.body.velocity.x = playerMovementSpeed; player.scale.x = 1; player.animations.play('walk'); isBusy=true;}	// move right
+        if (keyUp.isDown) 		{ player.body.velocity.y = -playerMovementSpeed; player.animations.play('walk'); isBusy=true;}	                    // move up
+        if (keyDown.isDown) 	{ player.body.velocity.y = playerMovementSpeed; player.animations.play('walk'); isBusy=true;}		                // move down
 
+        // check joystick input
         if (stick.isDown) {
-            isBusy = true;
-            //player.animations.play('walk');
-            this.physics.arcade.velocityFromRotation(stick.rotation, stick.force * movementSpeed, player.body.velocity);
+            isWalking = true;
+            this.physics.arcade.velocityFromRotation(stick.rotation, stick.force * playerMovementSpeed, player.body.velocity);
         }
 
         if (stick.angle < 89 && stick.angle > -89) {
@@ -145,12 +168,28 @@
             player.scale.x = -1;
         }
 
+        // check dpad input
+        if (dpad.isDown) {
+            // set attack 0
+
+            if (dpad.direction === Phaser.LEFT) {
+
+            } else if (dpad.direction === Phaser.RIGHT) {
+
+            } else if (dpad.direction === Phaser.UP) {
+
+            } else if (dpad.direction === Phaser.DOWN) {
+
+            }
+        }
+
+
         if(stick.isUp) {
-            isBusy = false;
+            isWalking = false;
         }
 
         // animations
-        if (isBusy === false) {
+        if (isWalking === false) {
             player.animations.play('idle');
         }
         else {
@@ -176,8 +215,9 @@
         //game.debug.cameraInfo(game.camera, 32, 32);
         //game.debug.spriteCoords(player, 32, 500);
 
-        //game.debug.body(player);
-        //game.debug.body(ai);
+        game.debug.body(player);
+        //game.debug.body(eSword);
+        game.debug.body(ai);
         //game.debug.body(wallsLayer);
         game.debug.text('FPS: ' + game.time.fps || 'FPS: --', 30, 16, "#00ff00");
 
@@ -204,11 +244,35 @@
         pathfinder.calculatePath();
 
         return goodPath;
+    }
 
+    function damagePlayer(damage) {
+        playerCurrentHealth -= damage;
+        if (playerCurrentHealth <= 0) {
+            //gameOver();
+        }
     }
 
     function gameOver() {
+        console.log(playerHealth);
+        console.log(playerCurrentHealth);
+
         alert("Game over, you died");
         window.location.reload();
     }
+
+function attack(direction) {
+    switch (direction) {
+        case up:
+
+            break;
+        case down:
+            break;
+        case left:
+            break;
+        case right:
+            break;
+
+    }
+}
 //};
