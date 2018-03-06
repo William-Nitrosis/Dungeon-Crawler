@@ -1,29 +1,5 @@
-//window.onload = function() {
-
-    /* ====== global variable ====== */
-    var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer;
-    var isBusy = false;
-    var playerInvulnerable = false;
-
-    var playerMovementSpeedMod = 1;
-    var playerMovementSpeedBase = 200;
-    var playerMovementSpeed = playerMovementSpeedMod * playerMovementSpeedBase;
-
-    var playerAttackSpeedMod = 1;
-    var playerAttackSpeedBase = 100;
-    var playerAttackSpeed = playerAttackSpeedMod * playerAttackSpeedBase;
-
-    var playerHealthMod = 1;
-    var playerHealthBase = 100;
-    var playerHealth = playerHealthMod * playerHealthBase;
-
-    /* ====== create game object and canvas ====== */
-    var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render:render });
-
-
-
-    /* ====== preload ====== */
-    function preload() {
+var tutorialState = {
+    preload: function () {
         // Window scaling
         //this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         //this.game.scale.setShowAll();
@@ -61,11 +37,8 @@
         game.input.addPointer();
         game.input.addPointer();
         game.input.addPointer();
-    }
-
-
-    /* ====== create ====== */
-    function create() {
+    },
+    create: function (){
         // world setup
         game.world.setBounds(0, 0, 5000, 5000);
         game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -99,7 +72,7 @@
         game.physics.arcade.enable(ai);
         ai.anchor.setTo(.5,.5);
         ai.body.setSize(45, 47, 27, 49);
-        ai.dmg = 10;
+        ai.dmg = 15;
 
 
         // slim animation
@@ -131,14 +104,11 @@
 
         // timers
         playerHitTimer = game.time.create(false);
-    }
-
-
-    /* ====== update ====== */
-    function update() {
+    },
+    update: function (){
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, ai);
-        game.physics.arcade.collide(ai, player, function(obj1){ damagePlayer(obj1); });
+        game.physics.arcade.collide(ai, player, this.damagePlayer);
         // reset players physics movement variable
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -191,20 +161,15 @@
 
 
         // path finding
-        path = findPathTo(floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+        path = this.findPathTo(floor.getTileX(player.x+20), floor.getTileY(player.y+32));
 
         if (path.length >= 4) {
             game.physics.arcade.moveToXY(ai, path[3].x*48, path[3].y*48, 100);
         } else {
             game.physics.arcade.moveToXY(ai, path[1].x*48, path[1].y*48, 100);
         }
-
-
-    }
-
-    /* ====== render ====== */
-    function render() {
-
+    },
+    render: function () {
         //game.debug.cameraInfo(game.camera, 32, 32);
         //game.debug.spriteCoords(player, 32, 500);
 
@@ -220,11 +185,9 @@
         game.debug.pointer(game.input.pointer4);
         game.debug.pointer(game.input.pointer5);
         game.debug.pointer(game.input.pointer6);
+    },
 
-    }
-
-    /* ====== path finding ====== */
-    function findPathTo(tilex, tiley) {
+    findPathTo: function (tilex, tiley) {
         var goodPath = [];
 
         pathfinder.setCallbackFunction(function(path) {
@@ -236,10 +199,9 @@
         pathfinder.calculatePath();
 
         return goodPath;
+    },
 
-    }
-
-    function damagePlayer(src) {
+    damagePlayer: function (src) {
         if (playerInvulnerable === false) {
             playerHealth -= src.dmg;
             console.log(playerHealth);
@@ -263,6 +225,5 @@
             console.log('%c PLAYER DEAD \n GAME OVER', styles);
             game.paused = true;
         }
-
     }
-//};
+};
