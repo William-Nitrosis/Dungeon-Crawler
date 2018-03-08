@@ -37,6 +37,10 @@ var tutorialState = {
         game.input.addPointer();
         game.input.addPointer();
         game.input.addPointer();
+
+        // load player weapons
+        playerWeaponStats = ironSword;
+        this.load.image('playerWeapon', playerWeaponStats.image);
     },
     create: function (){
         // world setup
@@ -62,23 +66,34 @@ var tutorialState = {
         //player.body.setSize(45, 68, 27, 27);
         player.body.setSize(45, 55, 27, 41);
 
+        // load player weapons
+        playerWeapon = game.add.sprite(player.x, player.y, 'playerWeapon');
+        game.physics.arcade.enable(playerWeapon);
+        playerWeapon.visible = false;
+
+
         // player animation
         player.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
         player.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
         player.animations.play('idle');
 
         // spawn ai
-        ai = game.add.sprite(1800, 830, 'slimeSheet');
-        game.physics.arcade.enable(ai);
-        ai.anchor.setTo(.5,.5);
-        ai.body.setSize(45, 47, 27, 49);
-        ai.dmg = 15;
+        enemies = game.add.group();
+        enemies.enableBody = true;
+        game.physics.arcade.enable(enemies);
+        for (var i = 0; i < 4; i++) {
+            ai = game.add.sprite(1800 + (i * 100), 830, 'slimeSheet');
+            game.physics.arcade.enable(ai);
+            ai.anchor.setTo(.5,.5);
+            ai.body.setSize(45, 47, 27, 49);
+            ai.dmg = 15;
 
-
-        // slim animation
-        ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
-        ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
-        ai.animations.play('idle');
+            // slim animation
+            ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
+            ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
+            ai.animations.play('idle');
+            enemies.add(ai);
+        }
 
         // enable keyboard inputs
         keyboard = game.input.keyboard.createCursorKeys();
@@ -104,11 +119,14 @@ var tutorialState = {
 
         // timers
         playerHitTimer = game.time.create(false);
+        playerAttackTimer = game.time.create(false);
+
     },
     update: function (){
         game.physics.arcade.collide(wallsLayer, player);
-        game.physics.arcade.collide(wallsLayer, ai);
-        game.physics.arcade.collide(ai, player, this.damagePlayer);
+        game.physics.arcade.collide(wallsLayer, enemies);
+        game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
+        game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
         // reset players physics movement variable
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -141,13 +159,13 @@ var tutorialState = {
             // set attack 0
 
             if (dpad.direction === Phaser.LEFT) {
-
+                this.playerAttackMeele("left");
             } else if (dpad.direction === Phaser.RIGHT) {
-
+                this.playerAttackMeele("right");
             } else if (dpad.direction === Phaser.UP) {
-
+                this.playerAttackMeele("up");
             } else if (dpad.direction === Phaser.DOWN) {
-
+                this.playerAttackMeele("down");
             }
         }
 
@@ -161,13 +179,19 @@ var tutorialState = {
 
 
         // path finding
-        path = this.findPathTo(floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+        //path = this.findPathTo(floor.getTileX(player.x+20), floor.getTileY(player.y+32));
 
-        if (path.length >= 4) {
-            game.physics.arcade.moveToXY(ai, path[3].x*48, path[3].y*48, 100);
-        } else {
-            game.physics.arcade.moveToXY(ai, path[1].x*48, path[1].y*48, 100);
-        }
+        //enemies.forEachAlive(this.pathSetup, this);
+
+        enemies.forEachAlive(function(enemy) {
+            path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+            this.pathSetup(enemy)
+        }, this);
+
+
+        // player weapon stuff
+        playerWeapon.x = player.x;
+        playerWeapon.y = player.y + 10;
     },
     render: function () {
         //game.debug.cameraInfo(game.camera, 32, 32);
@@ -176,6 +200,7 @@ var tutorialState = {
         //game.debug.body(player);
         //game.debug.body(ai);
         //game.debug.body(wallsLayer);
+        game.debug.body(playerWeapon);
         game.debug.text('FPS: ' + game.time.fps || 'FPS: --', 30, 16, "#00ff00");
 
         game.debug.pointer(game.input.mousePointer);
@@ -187,7 +212,15 @@ var tutorialState = {
         game.debug.pointer(game.input.pointer6);
     },
 
-    findPathTo: function (tilex, tiley) {
+    pathSetup: function (enemy) {
+        if (path.length >= 4) {
+            game.physics.arcade.moveToXY(enemy, path[3].x*48, path[3].y*48, 100);
+        } else {
+            game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
+        }
+    },
+
+    findPathTo: function (enemy, tilex, tiley) {
         var goodPath = [];
 
         pathfinder.setCallbackFunction(function(path) {
@@ -195,13 +228,13 @@ var tutorialState = {
             goodPath = path;
         });
 
-        pathfinder.preparePathCalculation([floor.getTileX(ai.x),floor.getTileY(ai.y)], [tilex,tiley]);
+        pathfinder.preparePathCalculation([floor.getTileX(enemy.x),floor.getTileY(enemy.y)], [tilex,tiley]);
         pathfinder.calculatePath();
 
         return goodPath;
     },
 
-    damagePlayer: function (src) {
+    damagePlayer: function (x, src) {
         if (playerInvulnerable === false) {
             playerHealth -= src.dmg;
             console.log(playerHealth);
@@ -225,5 +258,83 @@ var tutorialState = {
             console.log('%c PLAYER DEAD \n GAME OVER', styles);
             game.paused = true;
         }
+    },
+
+    playerAttackMeele: function (direction) {
+        if (playerAttacking === false) {
+            playerAttacking = true;
+            playerWeapon.x = player.x;
+            playerWeapon.y = player.y + 10;
+            playerWeapon.visible = true;
+            playerWeapon.body.setSize(0, 0, 0, 0);
+
+            switch (direction) {
+                case "right":
+                    playerWeapon.anchor.setTo(.5, 1.5);
+                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0);
+                    playerWeapon.angle = 0;
+                    game.add.tween(playerWeapon).to( { angle: 180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
+                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                        if (playerAttacking === true) {
+                            playerWeapon.visible = false;
+                            playerAttacking = false;
+                            playerAttackTimer.stop(true);
+                            playerWeapon.body.setSize(0, 0, 0, 0);
+                        }
+                    });
+                    playerAttackTimer.start();
+                    break;
+                case "left":
+                    playerWeapon.anchor.setTo(.5, 1.5);
+                    playerWeapon.body.setSize(-playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0);
+                    playerWeapon.angle = 0;
+                    game.add.tween(playerWeapon).to( { angle: -180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
+                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                        if (playerAttacking === true) {
+                            playerWeapon.visible = false;
+                            playerAttacking = false;
+                            playerAttackTimer.stop(true);
+                            playerWeapon.body.setSize(0, 0, 0, 0);
+                        }
+                    });
+                    playerAttackTimer.start();
+                    break;
+                case "up":
+                    playerWeapon.anchor.setTo(.5, 1.5);
+                    playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, -20);
+                    playerWeapon.angle = -90;
+                    game.add.tween(playerWeapon).to( { angle: 90 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
+                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                        if (playerAttacking === true) {
+                            playerWeapon.visible = false;
+                            playerAttacking = false;
+                            playerAttackTimer.stop(true);
+                            playerWeapon.body.setSize(0, 0, 0, 0);
+                        }
+                    });
+                    playerAttackTimer.start();
+                    break;
+                case "down":
+                    playerWeapon.anchor.setTo(.5, 1.5);
+                    playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, playerWeaponStats.rangeX);
+                    playerWeapon.angle = -90;
+                    game.add.tween(playerWeapon).to( { angle: -270 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
+                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                        if (playerAttacking === true) {
+                            playerWeapon.visible = false;
+                            playerAttacking = false;
+                            playerAttackTimer.stop(true);
+                            playerWeapon.body.setSize(0, 0, 0, 0);
+                        }
+                    });
+                    playerAttackTimer.start();
+                    break;
+            }
+
+        }
+    },
+
+    hitAi: function (x, enemy) {
+        enemy.kill();
     }
 };
