@@ -120,6 +120,14 @@ var tutorialState = {
         dpad = pad.addDPad(0, 0, 200, 'dpad');
         dpad.alignBottomRight(0);
 
+        // Health bars
+        playerHealthBar = new HealthBar(this.game, {
+            x: 1000,
+            y: 800
+        });
+        playerHealthBar.setFixedToCamera = true;
+
+
         // timers
         playerHitTimer = game.time.create(false);
         playerAttackTimer = game.time.create(false);
@@ -196,6 +204,9 @@ var tutorialState = {
         // player weapon stuff
         playerWeapon.x = player.x;
         playerWeapon.y = player.y + 10;
+
+        // UI updates
+        playerHealthBar.setPercent(playerHealth);
 
     },
     render: function () {
