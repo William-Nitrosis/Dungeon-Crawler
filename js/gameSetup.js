@@ -7,6 +7,7 @@ game.state.add('tutorial', tutorialState);
 
 /* ====== global variable ====== */
 var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer;
+
 var isBusy = false;
 var playerInvulnerable = false;
 var playerAttacking = false;

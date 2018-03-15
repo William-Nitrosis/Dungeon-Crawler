@@ -70,6 +70,7 @@ var tutorialState = {
         playerWeapon = game.add.sprite(player.x, player.y, 'playerWeapon');
         game.physics.arcade.enable(playerWeapon);
         playerWeapon.visible = false;
+        playerWeapon.body.setSize(0, 0, 0, 0);
 
 
         // player animation
@@ -87,6 +88,8 @@ var tutorialState = {
             ai.anchor.setTo(.5,.5);
             ai.body.setSize(45, 47, 27, 49);
             ai.dmg = 15;
+            ai.health = 10;
+            ai.hit = false;
 
             // slim animation
             ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
@@ -120,6 +123,7 @@ var tutorialState = {
         // timers
         playerHitTimer = game.time.create(false);
         playerAttackTimer = game.time.create(false);
+
 
     },
     update: function (){
@@ -192,6 +196,7 @@ var tutorialState = {
         // player weapon stuff
         playerWeapon.x = player.x;
         playerWeapon.y = player.y + 10;
+
     },
     render: function () {
         //game.debug.cameraInfo(game.camera, 32, 32);
@@ -286,7 +291,7 @@ var tutorialState = {
                     break;
                 case "left":
                     playerWeapon.anchor.setTo(.5, 1.5);
-                    playerWeapon.body.setSize(-playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0);
+                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, -playerWeaponStats.rangeX, 0);
                     playerWeapon.angle = 0;
                     game.add.tween(playerWeapon).to( { angle: -180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
                     playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
@@ -335,6 +340,19 @@ var tutorialState = {
     },
 
     hitAi: function (x, enemy) {
-        enemy.kill();
+        if (enemy.hit === false) {
+            enemy.health -= playerWeaponStats.dmg;
+            console.log(enemy.health);
+            enemy.hit = true;
+            enemy.tint = 0xff4444;
+            enemy.hitTimer = game.time.create(false);
+
+            enemy.hitTimer.loop(1000, function() {
+                enemy.tint = 0xffffff;
+                enemy.hit = false;
+                playerAttackTimer.stop(true);
+            });
+            enemy.hitTimer.start();
+        }
     }
 };
