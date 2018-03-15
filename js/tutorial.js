@@ -205,7 +205,7 @@ var tutorialState = {
         //game.debug.body(player);
         //game.debug.body(ai);
         //game.debug.body(wallsLayer);
-        game.debug.body(playerWeapon);
+        //game.debug.body(playerWeapon);
         game.debug.text('FPS: ' + game.time.fps || 'FPS: --', 30, 16, "#00ff00");
 
         game.debug.pointer(game.input.mousePointer);
@@ -350,9 +350,13 @@ var tutorialState = {
             enemy.hitTimer.loop(1000, function() {
                 enemy.tint = 0xffffff;
                 enemy.hit = false;
-                playerAttackTimer.stop(true);
+                enemy.hitTimer.stop(true);
             });
             enemy.hitTimer.start();
+        }
+
+        if (enemy.health <= 0) {
+            enemy.kill();
         }
     }
 };
