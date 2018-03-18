@@ -59,7 +59,7 @@ var tutorialState = {
         level1.setCollisionBetween(1, 3078, true, 'walls');
 
         // spawn and setup player, camera
-        player = game.add.sprite(1300, 830, 'knightSheet');
+        player = game.add.sprite(800, 830, 'knightSheet');
         game.physics.arcade.enable(player);
         player.anchor.setTo(.5,.5);
         game.camera.follow(player);
@@ -88,14 +88,39 @@ var tutorialState = {
             ai.anchor.setTo(.5,.5);
             ai.body.setSize(45, 47, 27, 49);
             ai.dmg = 15;
+            ai.maxHealth = 10;
             ai.health = 10;
             ai.hit = false;
+            ai.stunned = false;
+            ai.line = new Phaser.Line();
+
+            aiHealthBar = {
+                width: 62,
+                height: 10,
+                x: 0,
+                y: 0,
+                bg: {
+                    color: '#4e0002'
+                },
+                bar: {
+                    color: '#069500'
+                },
+                animationDuration: 1,
+                flipped: false,
+                isFixedToCamera: false
+            };
+
+            ai.healthBar = new HealthBar(this.game, aiHealthBar);
+
+            ai.healthBar.setPercent(ai.health);
+            ai.healthBar.setPosition(ai.x, ai.y);
 
             // slim animation
             ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
             ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
             ai.animations.play('idle');
             enemies.add(ai);
+
         }
 
         // enable keyboard inputs
@@ -121,12 +146,7 @@ var tutorialState = {
         dpad.alignBottomRight(0);
 
         // Health bars
-        playerHealthBar = new HealthBar(this.game, {
-            x: 1000,
-            y: 800
-        });
-        playerHealthBar.setFixedToCamera = true;
-
+        playerHealthBar = new HealthBar(this.game, healthbarConfig);
 
         // timers
         playerHitTimer = game.time.create(false);
@@ -196,9 +216,18 @@ var tutorialState = {
         //enemies.forEachAlive(this.pathSetup, this);
 
         enemies.forEachAlive(function(enemy) {
-            path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
-            this.pathSetup(enemy)
+            enemy.line.start.set(enemy.X, enemy.Y);
+            enemy.line.end.set(player.X, player.Y);
+            enemy.tileHit = wallsLayer.getRayCastTiles(enemy.line, 4, false, false);
+
+            if (enemy.stunned === false && enemy.tileHit <= 0) {
+                path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+                this.pathSetup(enemy);
+            }
+            enemy.healthBar.setPercent(enemy.health * (100 / enemy.maxHealth));
+            enemy.healthBar.setPosition(enemy.x, enemy.y);
         }, this);
+
 
 
         // player weapon stuff
@@ -206,7 +235,7 @@ var tutorialState = {
         playerWeapon.y = player.y + 10;
 
         // UI updates
-        playerHealthBar.setPercent(playerHealth);
+        playerHealthBar.setPercent(playerHealth * (100 / playerMaxHealth));
 
     },
     render: function () {
@@ -226,13 +255,26 @@ var tutorialState = {
         game.debug.pointer(game.input.pointer4);
         game.debug.pointer(game.input.pointer5);
         game.debug.pointer(game.input.pointer6);
+
+        enemies.forEachAlive(function(enemy) {
+            game.debug.geom(enemy.line);
+        }, this);
+
     },
 
     pathSetup: function (enemy) {
         if (path.length >= 4) {
             game.physics.arcade.moveToXY(enemy, path[3].x*48, path[3].y*48, 100);
+        } else if (path.length >= 3) {
+            game.physics.arcade.moveToXY(enemy, path[2].x * 48, path[2].y * 48, 100);
         } else {
             game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
+        }
+
+        if (enemy.x > player.x) {
+            enemy.scale.x = -1;
+        } else {
+            enemy.scale.x = 1;
         }
     },
 
@@ -367,7 +409,21 @@ var tutorialState = {
         }
 
         if (enemy.health <= 0) {
+            enemy.healthBar.kill();
             enemy.kill();
         }
+    },
+
+    findObjectsByType: function(type, map, layer) {
+        var result = new Array();
+        map.objects[layer].forEach(function(element) {
+            console.log(element);
+            if (element.properties.type === type) {
+                console.log("Found " + element.name);
+                element.y -= map.tileHeight;
+                result.push(element);
+            }
+        });
+        return result;
     }
 };

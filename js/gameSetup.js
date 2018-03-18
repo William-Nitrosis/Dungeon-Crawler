@@ -6,7 +6,7 @@ game.state.add('mainMenu', mainMenuState);
 game.state.add('tutorial', tutorialState);
 
 /* ====== global variable ====== */
-var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, playerHealthBar;
+var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar;
 
 var isBusy = false;
 var playerInvulnerable = false;
@@ -22,7 +22,24 @@ var playerAttackSpeed = playerAttackSpeedMod * playerAttackSpeedBase;
 
 var playerHealthMod = 1;
 var playerHealthBase = 100;
+var playerMaxHealth = playerHealthMod * playerHealthBase;
 var playerHealth = playerHealthMod * playerHealthBase;
+
+var playerHealthBar = healthbarConfig = {
+    width: 250,
+    height: 40,
+    x: 150,
+    y: 50,
+    bg: {
+        color: '#4e0002'
+    },
+    bar: {
+        color: '#069500'
+    },
+    animationDuration: 1,
+    flipped: false,
+    isFixedToCamera: true
+};
 
 
 
