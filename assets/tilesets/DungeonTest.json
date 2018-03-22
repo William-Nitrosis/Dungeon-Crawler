@@ -43,8 +43,60 @@
          "width":50,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "name":"objects",
+         "objects":[
+                {
+                 "height":284,
+                 "id":1,
+                 "name":"",
+                 "properties":
+                    {
+                     "enemy":"slime",
+                     "type":"spawnZone"
+                    },
+                 "propertytypes":
+                    {
+                     "enemy":"string",
+                     "type":"string"
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":571,
+                 "x":1590,
+                 "y":576
+                }, 
+                {
+                 "height":475,
+                 "id":4,
+                 "name":"",
+                 "properties":
+                    {
+                     "enemy":"slime",
+                     "type":"spawnZone"
+                    },
+                 "propertytypes":
+                    {
+                     "enemy":"string",
+                     "type":"string"
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":762,
+                 "x":195.5,
+                 "y":292
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextobjectid":1,
+ "nextobjectid":5,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.0.3",

@@ -1,13 +1,5 @@
 var tutorialState = {
     preload: function () {
-        // Window scaling
-        //this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        //this.game.scale.setShowAll();
-        //window.addEventListener('resize', function () {
-        //    this.game.scale.refresh();
-        //} );
-        //this.game.scale.refresh();
-
         // make everything CRISP
         game.camera.scale.x = 1;
         game.camera.scale.y = 1;
@@ -55,15 +47,15 @@ var tutorialState = {
         floor = level1.createLayer('floor');
         floorOverlay = level1.createLayer('floorOverlay');
         wallsLayer = level1.createLayer('walls');
+        objectsLayer = level1.createLayer('objects');
         background.resizeWorld();
         level1.setCollisionBetween(1, 3078, true, 'walls');
 
         // spawn and setup player, camera
-        player = game.add.sprite(1300, 830, 'knightSheet');
+        player = game.add.sprite(800, 830, 'knightSheet');
         game.physics.arcade.enable(player);
         player.anchor.setTo(.5,.5);
         game.camera.follow(player);
-        //player.body.setSize(45, 68, 27, 27);
         player.body.setSize(45, 55, 27, 41);
 
         // load player weapons
@@ -88,14 +80,40 @@ var tutorialState = {
             ai.anchor.setTo(.5,.5);
             ai.body.setSize(45, 47, 27, 49);
             ai.dmg = 15;
+            ai.maxHealth = 10;
             ai.health = 10;
             ai.hit = false;
+            ai.stunned = false;
+            ai.line = new Phaser.Line();
+
+            // styling for the ai health bar
+            aiHealthBar = {
+                width: 62,
+                height: 10,
+                x: 0,
+                y: 0,
+                bg: {
+                    color: '#4e0002'
+                },
+                bar: {
+                    color: '#069500'
+                },
+                animationDuration: 1,
+                flipped: false,
+                isFixedToCamera: false
+            };
+
+            ai.healthBar = new HealthBar(this.game, aiHealthBar);
+
+            ai.healthBar.setPercent(ai.health);
+            ai.healthBar.setPosition(ai.x, ai.y);
 
             // slim animation
             ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
             ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
             ai.animations.play('idle');
             enemies.add(ai);
+
         }
 
         // enable keyboard inputs
@@ -111,34 +129,46 @@ var tutorialState = {
         pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
         pathfinder.setGrid(level1.layers[1].data, walkables);
 
-        // Joystick
+        // joystick
         pad = game.plugins.add(Phaser.VirtualJoystick);
 
         stick = pad.addStick(0, 0, 200, 'arcade');
         stick.alignBottomLeft();
 
+        // dpad
         dpad = pad.addDPad(0, 0, 200, 'dpad');
         dpad.alignBottomRight(0);
 
         // Health bars
-        playerHealthBar = new HealthBar(this.game, {
-            x: 1000,
-            y: 800
-        });
-        playerHealthBar.setFixedToCamera = true;
-
+        playerHealthBar = new HealthBar(this.game, healthbarConfig);
 
         // timers
         playerHitTimer = game.time.create(false);
         playerAttackTimer = game.time.create(false);
 
+        // spawn zones and ai spawning
+        console.log(this.findObjectsByType("spawnZone", level1));
+
+        // testing code for Tiled objects -- not finished
+        this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
+            //console.log(zone.properties.type);
+
+            if (zone.properties.type === "spawnZone") {
+                switch (zone.properties.enemy) {
+                    case "slime":
+                        console.log("slime detected");
+                }
+            }
+        })
 
     },
     update: function (){
+        // collisions and calls
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, enemies);
         game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
+
         // reset players physics movement variable
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -150,26 +180,27 @@ var tutorialState = {
         if (keyUp.isDown) 		{ player.body.velocity.y = -playerMovementSpeed; player.animations.play('walk'); isBusy=true;}	// move up
         if (keyDown.isDown) 	{ player.body.velocity.y = playerMovementSpeed; player.animations.play('walk'); isBusy=true;}		// move down
 
+        // check joystick inputs
         if (stick.isDown) {
             isBusy = true;
-            //player.animations.play('walk');
             this.physics.arcade.velocityFromRotation(stick.rotation, stick.force * playerMovementSpeed, player.body.velocity);
         }
 
+        // flip player sprite
         if (stick.angle < 89 && stick.angle > -89) {
             player.scale.x = 1;
         } else {
             player.scale.x = -1;
         }
 
+        // check if the player is moving
         if(stick.isUp) {
             isBusy = false;
         }
 
         // check dpad input
         if (dpad.isDown) {
-            // set attack 0
-
+            // call attack function
             if (dpad.direction === Phaser.LEFT) {
                 this.playerAttackMeele("left");
             } else if (dpad.direction === Phaser.RIGHT) {
@@ -181,7 +212,7 @@ var tutorialState = {
             }
         }
 
-        // animations
+        // animations for player
         if (isBusy === false) {
             player.animations.play('idle');
         }
@@ -190,26 +221,36 @@ var tutorialState = {
         }
 
 
-        // path finding
-        //path = this.findPathTo(floor.getTileX(player.x+20), floor.getTileY(player.y+32));
-
-        //enemies.forEachAlive(this.pathSetup, this);
-
+        // enemy updates
         enemies.forEachAlive(function(enemy) {
-            path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
-            this.pathSetup(enemy)
+            // check line of sight
+            enemy.line.start.set(enemy.X, enemy.Y);
+            enemy.line.end.set(player.X, player.Y);
+            enemy.tileHit = wallsLayer.getRayCastTiles(enemy.line, 4, false, false);
+
+            // move setup pathing
+            if (enemy.stunned === false && enemy.tileHit <= 0) {
+                path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+                this.pathSetup(enemy);
+            }
+
+            // scale enemy health bar and update position
+            enemy.healthBar.setPercent(enemy.health * (100 / enemy.maxHealth));
+            enemy.healthBar.setPosition(enemy.x, enemy.y);
         }, this);
 
 
-        // player weapon stuff
+
+        // update player weapon position
         playerWeapon.x = player.x;
         playerWeapon.y = player.y + 10;
 
         // UI updates
-        playerHealthBar.setPercent(playerHealth);
+        playerHealthBar.setPercent(playerHealth * (100 / playerMaxHealth));
 
     },
     render: function () {
+        // -- debugging code
         //game.debug.cameraInfo(game.camera, 32, 32);
         //game.debug.spriteCoords(player, 32, 500);
 
@@ -224,18 +265,33 @@ var tutorialState = {
         game.debug.pointer(game.input.pointer2);
         game.debug.pointer(game.input.pointer3);
         game.debug.pointer(game.input.pointer4);
-        game.debug.pointer(game.input.pointer5);
-        game.debug.pointer(game.input.pointer6);
+
+        /*enemies.forEachAlive(function(enemy) {
+            game.debug.geom(enemy.line);
+        }, this);*/
+
+        // -- end debugging code
     },
 
+   // move the enemies along the path
     pathSetup: function (enemy) {
         if (path.length >= 4) {
             game.physics.arcade.moveToXY(enemy, path[3].x*48, path[3].y*48, 100);
+        } else if (path.length >= 3) {
+            game.physics.arcade.moveToXY(enemy, path[2].x * 48, path[2].y * 48, 100);
         } else {
             game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
         }
+
+        // flip enemy sprite
+        if (enemy.x > player.x) {
+            enemy.scale.x = -1;
+        } else {
+            enemy.scale.x = 1;
+        }
     },
 
+    // run path finding algorithm to calculate the path to follow
     findPathTo: function (enemy, tilex, tiley) {
         var goodPath = [];
 
@@ -250,15 +306,16 @@ var tutorialState = {
         return goodPath;
     },
 
+    // function to apply damage to the player
     damagePlayer: function (x, src) {
-        if (playerInvulnerable === false) {
+        if (playerInvulnerable === false) { // checks if the player can take damage
             playerHealth -= src.dmg;
             console.log(playerHealth);
             playerInvulnerable = true;
             player.tint = 0xff4444;
             playerHitTimer.loop(500, function(){ playerInvulnerable = false; player.tint = 0xffffff; playerHitTimer.stop(true);});
             playerHitTimer.start();
-        } else if (playerHealth <= 0) {
+        } else if (playerHealth <= 0) { // game over screen and styles for console log
             var styles = [
                 'background: linear-gradient(#D33106, #571402)'
                 , 'border: 1px solid #3E0E02'
@@ -276,8 +333,9 @@ var tutorialState = {
         }
     },
 
+    // function for the player melee attacking
     playerAttackMeele: function (direction) {
-        if (playerAttacking === false) {
+        if (playerAttacking === false) { // check if the player can attack
             playerAttacking = true;
             playerWeapon.x = player.x;
             playerWeapon.y = player.y + 10;
@@ -286,11 +344,11 @@ var tutorialState = {
 
             switch (direction) {
                 case "right":
-                    playerWeapon.anchor.setTo(.5, 1.5);
-                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0);
+                    playerWeapon.anchor.setTo(.5, 1.5); // set rotation point of weapon
+                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0); // set collision box
                     playerWeapon.angle = 0;
-                    game.add.tween(playerWeapon).to( { angle: 180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
-                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                    game.add.tween(playerWeapon).to( { angle: 180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true); // animation only
+                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){ // timer settings for weapon duration
                         if (playerAttacking === true) {
                             playerWeapon.visible = false;
                             playerAttacking = false;
@@ -300,7 +358,7 @@ var tutorialState = {
                     });
                     playerAttackTimer.start();
                     break;
-                case "left":
+                case "left": // see comments for case right
                     playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, -playerWeaponStats.rangeX, 0);
                     playerWeapon.angle = 0;
@@ -315,7 +373,7 @@ var tutorialState = {
                     });
                     playerAttackTimer.start();
                     break;
-                case "up":
+                case "up": // see comments for case right
                     playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, -20);
                     playerWeapon.angle = -90;
@@ -330,7 +388,7 @@ var tutorialState = {
                     });
                     playerAttackTimer.start();
                     break;
-                case "down":
+                case "down": // see comments for case right
                     playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, playerWeaponStats.rangeX);
                     playerWeapon.angle = -90;
@@ -350,15 +408,16 @@ var tutorialState = {
         }
     },
 
+    // function for the ai taking damage
     hitAi: function (x, enemy) {
-        if (enemy.hit === false) {
+        if (enemy.hit === false) { // checks if the ai can be hit
             enemy.health -= playerWeaponStats.dmg;
             console.log(enemy.health);
             enemy.hit = true;
             enemy.tint = 0xff4444;
             enemy.hitTimer = game.time.create(false);
 
-            enemy.hitTimer.loop(1000, function() {
+            enemy.hitTimer.loop(1000, function() { // timer settings
                 enemy.tint = 0xffffff;
                 enemy.hit = false;
                 enemy.hitTimer.stop(true);
@@ -366,8 +425,22 @@ var tutorialState = {
             enemy.hitTimer.start();
         }
 
-        if (enemy.health <= 0) {
+        if (enemy.health <= 0) { // kill the ai when their health is 0
+            enemy.healthBar.kill();
             enemy.kill();
         }
+    },
+
+    // testing script to debug Tiled map objects -- not finished
+    findObjectsByType: function(type, map) {
+        var objectArr = [];
+        map.objects.objects.forEach(function(obj){ //Check each object found in layer.
+
+            if(obj.properties.type === type){ //Check if the type of this object matches with the one we want.
+                obj.y -= map.tileHeight; //Phaser counts from top down, Tiled counts from bottom up.
+                objectArr.push(obj); //Push obj into objectArr.
+            }
+        });
+        return objectArr;
     }
 };
