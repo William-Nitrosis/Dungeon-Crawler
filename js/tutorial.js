@@ -223,25 +223,38 @@ var tutorialState = {
 
         // enemy updates
         enemies.forEachAlive(function(enemy) {
+<<<<<<< HEAD
             // check line of sight
+=======
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
             enemy.line.start.set(enemy.X, enemy.Y);
             enemy.line.end.set(player.X, player.Y);
             enemy.tileHit = wallsLayer.getRayCastTiles(enemy.line, 4, false, false);
 
+<<<<<<< HEAD
             // move setup pathing
+=======
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
             if (enemy.stunned === false && enemy.tileHit <= 0) {
                 path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
                 this.pathSetup(enemy);
             }
+<<<<<<< HEAD
 
             // scale enemy health bar and update position
+=======
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
             enemy.healthBar.setPercent(enemy.health * (100 / enemy.maxHealth));
             enemy.healthBar.setPosition(enemy.x, enemy.y);
         }, this);
 
 
 
+<<<<<<< HEAD
         // update player weapon position
+=======
+        // player weapon stuff
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
         playerWeapon.x = player.x;
         playerWeapon.y = player.y + 10;
 
@@ -265,12 +278,22 @@ var tutorialState = {
         game.debug.pointer(game.input.pointer2);
         game.debug.pointer(game.input.pointer3);
         game.debug.pointer(game.input.pointer4);
+<<<<<<< HEAD
 
         /*enemies.forEachAlive(function(enemy) {
             game.debug.geom(enemy.line);
         }, this);*/
 
         // -- end debugging code
+=======
+        game.debug.pointer(game.input.pointer5);
+        game.debug.pointer(game.input.pointer6);
+
+        enemies.forEachAlive(function(enemy) {
+            game.debug.geom(enemy.line);
+        }, this);
+
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
     },
 
    // move the enemies along the path
@@ -283,7 +306,10 @@ var tutorialState = {
             game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
         }
 
+<<<<<<< HEAD
         // flip enemy sprite
+=======
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
         if (enemy.x > player.x) {
             enemy.scale.x = -1;
         } else {
@@ -425,12 +451,17 @@ var tutorialState = {
             enemy.hitTimer.start();
         }
 
+<<<<<<< HEAD
         if (enemy.health <= 0) { // kill the ai when their health is 0
+=======
+        if (enemy.health <= 0) {
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
             enemy.healthBar.kill();
             enemy.kill();
         }
     },
 
+<<<<<<< HEAD
     // testing script to debug Tiled map objects -- not finished
     findObjectsByType: function(type, map) {
         var objectArr = [];
@@ -442,5 +473,18 @@ var tutorialState = {
             }
         });
         return objectArr;
+=======
+    findObjectsByType: function(type, map, layer) {
+        var result = new Array();
+        map.objects[layer].forEach(function(element) {
+            console.log(element);
+            if (element.properties.type === type) {
+                console.log("Found " + element.name);
+                element.y -= map.tileHeight;
+                result.push(element);
+            }
+        });
+        return result;
+>>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
     }
 };
