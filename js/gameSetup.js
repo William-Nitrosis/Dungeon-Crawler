@@ -6,11 +6,7 @@ game.state.add('mainMenu', mainMenuState);
 game.state.add('tutorial', tutorialState);
 
 /* ====== global variable ====== */
-<<<<<<< HEAD
 var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar, objectsLayer;
-=======
-var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar;
->>>>>>> f1a1fdbf4236b413b13cc9f349a734b8bf182564
 
 // walkables - defines what tiles in the layers the ai can path find over
 // pad and stick are the variables used to store the UI control sprites

@@ -10,10 +10,14 @@
 -   Finish enemy AI mechanics such as knock back
 	- When the player hits the AI, knock them back, the same for when the AI hits the player
 -   Implement different player weapons
-	- 
+	- Create the sprites and update the variable sheet for weapon stats
 -   Implement different player characters
+    - Create the other player characters and classes such as wizards and archers
 -   Finish the RPG leveling system
+    - Give the p=layer XP and create the level sheet and modifier values
 -   Create dungeon random generation engine
+    - Finish the object lay generation and then implement different levels
 -   Add loot cards
--   Design passive effects
--   Design active effects
+    - Add the loot cards into the game as a end of dungeon reward
+    - Design passive effects
+    - Design active effects
