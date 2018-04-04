@@ -47,7 +47,7 @@ var tutorialState = {
         floor = level1.createLayer('floor');
         floorOverlay = level1.createLayer('floorOverlay');
         wallsLayer = level1.createLayer('walls');
-        objectsLayer = level1.createLayer('objects');
+        //objectsLayer = level1.createLayer('objects');
         background.resizeWorld();
         level1.setCollisionBetween(1, 3078, true, 'walls');
 
@@ -75,45 +75,6 @@ var tutorialState = {
         enemies.enableBody = true;
         game.physics.arcade.enable(enemies);
         for (var i = 0; i < 4; i++) {
-            ai = game.add.sprite(1800 + (i * 100), 830, 'slimeSheet');
-            game.physics.arcade.enable(ai);
-            ai.anchor.setTo(.5,.5);
-            ai.body.setSize(45, 47, 27, 49);
-            ai.dmg = 15;
-            ai.maxHealth = 10;
-            ai.health = 10;
-            ai.hit = false;
-            ai.stunned = false;
-            ai.line = new Phaser.Line();
-
-            // styling for the ai health bar
-            aiHealthBar = {
-                width: 62,
-                height: 10,
-                x: 0,
-                y: 0,
-                bg: {
-                    color: '#4e0002'
-                },
-                bar: {
-                    color: '#069500'
-                },
-                animationDuration: 1,
-                flipped: false,
-                isFixedToCamera: false
-            };
-
-            ai.healthBar = new HealthBar(this.game, aiHealthBar);
-
-            ai.healthBar.setPercent(ai.health);
-            ai.healthBar.setPosition(ai.x, ai.y);
-
-            // slim animation
-            ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
-            ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
-            ai.animations.play('idle');
-            enemies.add(ai);
-
         }
 
         // enable keyboard inputs
@@ -149,14 +110,60 @@ var tutorialState = {
         // spawn zones and ai spawning
         console.log(this.findObjectsByType("spawnZone", level1));
 
-        // testing code for Tiled objects -- not finished
+        // testing code for Tiled objects
         this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
             //console.log(zone.properties.type);
 
             if (zone.properties.type === "spawnZone") {
                 switch (zone.properties.enemy) {
                     case "slime":
-                        console.log("slime detected");
+                        console.log(zone.properties.count);
+
+                        for (var i = 0; i < zone.properties.count; i++){
+                            var spawnX = game.rnd.integerInRange(zone.x, zone.x + zone.width);
+                            var spawnY = game.rnd.integerInRange(zone.y, zone.y + zone.height);
+                            console.log(spawnX);
+                            console.log(spawnY);
+
+                            ai = game.add.sprite(spawnX, spawnY, 'slimeSheet');
+                            game.physics.arcade.enable(ai);
+                            ai.anchor.setTo(.5,.5);
+                            ai.body.setSize(45, 47, 27, 49);
+                            ai.dmg = 15;
+                            ai.maxHealth = 10;
+                            ai.health = 10;
+                            ai.hit = false;
+                            ai.stunned = false;
+                            ai.line = new Phaser.Line();
+
+                            // styling for the ai health bar
+                            aiHealthBar = {
+                                width: 62,
+                                height: 10,
+                                x: 0,
+                                y: 0,
+                                bg: {
+                                    color: '#4e0002'
+                                },
+                                bar: {
+                                    color: '#069500'
+                                },
+                                animationDuration: 1,
+                                flipped: false,
+                                isFixedToCamera: false
+                            };
+
+                            ai.healthBar = new HealthBar(this.game, aiHealthBar);
+
+                            ai.healthBar.setPercent(ai.health);
+                            ai.healthBar.setPosition(ai.x, ai.y);
+
+                            // slim animation
+                            ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
+                            ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
+                            ai.animations.play('idle');
+                            enemies.add(ai);
+                        }
                 }
             }
         })
@@ -224,9 +231,11 @@ var tutorialState = {
         // enemy updates
         enemies.forEachAlive(function(enemy) {
             // check line of sight
-            enemy.line.start.set(enemy.X, enemy.Y);
-            enemy.line.end.set(player.X, player.Y);
-            enemy.tileHit = wallsLayer.getRayCastTiles(enemy.line, 4, false, false);
+            //enemy.line.start.set(enemy.X, enemy.Y);
+            //enemy.line.end.set(player.X, player.Y);
+            enemy.line.setTo(enemy.X, enemy.Y, player.X, player.Y);
+            //console.log(enemy.line);
+            this.lineSight(enemy.line);
 
             // move setup pathing
             if (enemy.stunned === false && enemy.tileHit <= 0) {
@@ -266,9 +275,9 @@ var tutorialState = {
         game.debug.pointer(game.input.pointer3);
         game.debug.pointer(game.input.pointer4);
 
-        /*enemies.forEachAlive(function(enemy) {
+        enemies.forEachAlive(function(enemy) {
             game.debug.geom(enemy.line);
-        }, this);*/
+        }, this);
 
         // -- end debugging code
     },
@@ -289,6 +298,8 @@ var tutorialState = {
         } else {
             enemy.scale.x = 1;
         }
+
+
     },
 
     // run path finding algorithm to calculate the path to follow
@@ -442,5 +453,24 @@ var tutorialState = {
             }
         });
         return objectArr;
+    },
+
+    lineSight: function (line) {
+        tileHits = floor.getRayCastTiles(line, 4, false, false);
+        if(tileHits.length < 7){
+            var wall = false;
+            tileHits.forEach(function(element){
+                if(element.index !== -1){
+                    wall = true;
+                }
+            });
+
+            if(!wall){
+                //console.log("Danger, Will Robinson! Danger!")
+            }
+
+        }
+
+        //console.log(line);
     }
 };
