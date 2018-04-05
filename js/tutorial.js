@@ -108,7 +108,7 @@ var tutorialState = {
         playerAttackTimer = game.time.create(false);
 
         // spawn zones and ai spawning
-        console.log(this.findObjectsByType("spawnZone", level1));
+        //console.log(this.findObjectsByType("spawnZone", level1));
 
         // testing code for Tiled objects
         this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
@@ -117,13 +117,13 @@ var tutorialState = {
             if (zone.properties.type === "spawnZone") {
                 switch (zone.properties.enemy) {
                     case "slime":
-                        console.log(zone.properties.count);
+                        //console.log(zone.properties.count);
 
                         for (var i = 0; i < zone.properties.count; i++){
                             var spawnX = game.rnd.integerInRange(zone.x, zone.x + zone.width);
                             var spawnY = game.rnd.integerInRange(zone.y, zone.y + zone.height);
-                            console.log(spawnX);
-                            console.log(spawnY);
+                            //console.log(spawnX);
+                            //console.log(spawnY);
 
                             ai = game.add.sprite(spawnX, spawnY, 'slimeSheet');
                             game.physics.arcade.enable(ai);
@@ -135,6 +135,9 @@ var tutorialState = {
                             ai.hit = false;
                             ai.stunned = false;
                             ai.line = new Phaser.Line();
+                            ai.losRange = 20;
+                            ai.inRange = false;
+                            ai.canSee = false;
 
                             // styling for the ai health bar
                             aiHealthBar = {
@@ -230,15 +233,16 @@ var tutorialState = {
 
         // enemy updates
         enemies.forEachAlive(function(enemy) {
+            enemy.body.velocity.x = 0;
+            enemy.body.velocity.y = 0;
             // check line of sight
-            //enemy.line.start.set(enemy.X, enemy.Y);
-            //enemy.line.end.set(player.X, player.Y);
-            enemy.line.setTo(enemy.X, enemy.Y, player.X, player.Y);
+            enemy.line.start.set(enemy.x, enemy.y);
+            enemy.line.end.set(player.x, player.y);
             //console.log(enemy.line);
-            this.lineSight(enemy.line);
+            //console.log(this.lineSight(enemy.line, enemy.losRange));
 
             // move setup pathing
-            if (enemy.stunned === false && enemy.tileHit <= 0) {
+            if (enemy.stunned === false && this.lineSight(enemy.line, enemy.losRange, enemy)) {
                 path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
                 this.pathSetup(enemy);
             }
@@ -455,22 +459,22 @@ var tutorialState = {
         return objectArr;
     },
 
-    lineSight: function (line) {
-        tileHits = floor.getRayCastTiles(line, 4, false, false);
-        if(tileHits.length < 7){
-            var wall = false;
+    lineSight: function (line, range, enemy) {
+        enemy.inRange = false;
+        enemy.canSee = true;
+        tileHits = wallsLayer.getRayCastTiles(line, 4, false, false);
+        if(tileHits.length <= range){
+            enemy.inRange = true;
             tileHits.forEach(function(element){
                 if(element.index !== -1){
-                    wall = true;
+                    enemy.canSee = false;
                 }
             });
-
-            if(!wall){
-                //console.log("Danger, Will Robinson! Danger!")
-            }
-
         }
 
-        //console.log(line);
+
+        if (enemy.inRange === true && enemy.canSee === true) {
+            return true;
+        }
     }
 };
