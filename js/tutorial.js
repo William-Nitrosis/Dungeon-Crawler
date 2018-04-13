@@ -24,6 +24,9 @@ var tutorialState = {
         this.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
         this.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
 
+        // player exit collision box
+        this.load.image('playerStartPoint', 'assets/tilesets/playerExitZone.png');
+
         // touch control
         game.input.addPointer();
         game.input.addPointer();
@@ -51,31 +54,10 @@ var tutorialState = {
         background.resizeWorld();
         level1.setCollisionBetween(1, 3078, true, 'walls');
 
-        // spawn and setup player, camera
-        player = game.add.sprite(800, 830, 'knightSheet');
-        game.physics.arcade.enable(player);
-        player.anchor.setTo(.5,.5);
-        game.camera.follow(player);
-        player.body.setSize(45, 55, 27, 41);
-
-        // load player weapons
-        playerWeapon = game.add.sprite(player.x, player.y, 'playerWeapon');
-        game.physics.arcade.enable(playerWeapon);
-        playerWeapon.visible = false;
-        playerWeapon.body.setSize(0, 0, 0, 0);
-
-
-        // player animation
-        player.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
-        player.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
-        player.animations.play('idle');
-
         // spawn ai
         enemies = game.add.group();
         enemies.enableBody = true;
         game.physics.arcade.enable(enemies);
-        for (var i = 0; i < 4; i++) {
-        }
 
         // enable keyboard inputs
         keyboard = game.input.keyboard.createCursorKeys();
@@ -110,7 +92,8 @@ var tutorialState = {
         // spawn zones and ai spawning
         //console.log(this.findObjectsByType("spawnZone", level1));
 
-        // testing code for Tiled objects
+        // code for Tiled objects
+        // enemies
         this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
             //console.log(zone.properties.type);
 
@@ -122,60 +105,50 @@ var tutorialState = {
                         for (var i = 0; i < zone.properties.count; i++){
                             var spawnX = game.rnd.integerInRange(zone.x, zone.x + zone.width);
                             var spawnY = game.rnd.integerInRange(zone.y, zone.y + zone.height);
-                            //console.log(spawnX);
-                            //console.log(spawnY);
-
-                            ai = game.add.sprite(spawnX, spawnY, 'slimeSheet');
-                            game.physics.arcade.enable(ai);
-                            ai.anchor.setTo(.5,.5);
-                            ai.body.setSize(45, 47, 27, 49);
-                            ai.dmg = 15;
-                            ai.maxHealth = 10;
-                            ai.health = 10;
-                            ai.hit = false;
-                            ai.stunned = false;
-                            ai.line = new Phaser.Line();
-                            ai.losRange = 20;
-                            ai.inRange = false;
-                            ai.canSee = false;
-
-                            // styling for the ai health bar
-                            aiHealthBar = {
-                                width: 62,
-                                height: 10,
-                                x: 0,
-                                y: 0,
-                                bg: {
-                                    color: '#4e0002'
-                                },
-                                bar: {
-                                    color: '#069500'
-                                },
-                                animationDuration: 1,
-                                flipped: false,
-                                isFixedToCamera: false
-                            };
-
-                            ai.healthBar = new HealthBar(this.game, aiHealthBar);
-
-                            ai.healthBar.setPercent(ai.health);
-                            ai.healthBar.setPosition(ai.x, ai.y);
-
-                            // slim animation
-                            ai.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
-                            ai.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
-                            ai.animations.play('idle');
-                            enemies.add(ai);
+                            spawnSlime(spawnX, spawnY);
                         }
                 }
             }
-        })
+        });
+
+        // Spawning player
+        this.findObjectsByType("playerSpawn", level1).forEach(function(zone) {
+            // spawn and setup player, camera
+            player = game.add.sprite(zone.x + (zone.width / 2), zone.y + (zone.height / 2), 'knightSheet');
+            game.physics.arcade.enable(player);
+            player.anchor.setTo(.5,.5);
+            game.camera.follow(player);
+            player.body.setSize(45, 55, 27, 41);
+
+            // load player weapons
+            playerWeapon = game.add.sprite(player.x, player.y, 'playerWeapon');
+            game.physics.arcade.enable(playerWeapon);
+            playerWeapon.visible = false;
+            playerWeapon.body.setSize(0, 0, 0, 0);
+
+            // player animation
+            player.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
+            player.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
+            player.animations.play('idle');
+        });
+
+        this.findObjectsByType("playerExit", level1).forEach(function(zone) {
+            console.log(zone);
+            playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerStartPoint');
+            playerExitZone.enableBody = true;
+            game.physics.arcade.enable(playerExitZone);
+
+
+        });
+
+
 
     },
     update: function (){
         // collisions and calls
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, enemies);
+        game.physics.arcade.overlap(playerExitZone, player, this.endLevel);
         game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
 
@@ -236,7 +209,7 @@ var tutorialState = {
             enemy.body.velocity.x = 0;
             enemy.body.velocity.y = 0;
             // check line of sight
-            enemy.line.start.set(enemy.x, enemy.y);
+            enemy.line.start.set(enemy.x, enemy.y + (enemy.height / 4));
             enemy.line.end.set(player.x, player.y);
             //console.log(enemy.line);
             //console.log(this.lineSight(enemy.line, enemy.losRange));
@@ -271,6 +244,7 @@ var tutorialState = {
         //game.debug.body(ai);
         //game.debug.body(wallsLayer);
         //game.debug.body(playerWeapon);
+        game.debug.body(playerExitZone);
         game.debug.text('FPS: ' + game.time.fps || 'FPS: --', 30, 16, "#00ff00");
 
         game.debug.pointer(game.input.mousePointer);
@@ -474,7 +448,13 @@ var tutorialState = {
 
 
         if (enemy.inRange === true && enemy.canSee === true) {
+            enemy.animations.play('walk');
             return true;
         }
+        enemy.animations.play('idle');
+    },
+
+    endLevel: function () {
+        alert("Level complete");
     }
 };
