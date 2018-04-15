@@ -13,7 +13,6 @@ var mainMenuState = {
 
         debuggerButton = game.add.button(game.world.centerX - 100, game.world.centerY - 100, 'debuggedButton', function(){
             debugged =! debugged;
-            console.log(debugged);
 
             if (debugged) {
                 debuggerButton.setFrames(0);
@@ -22,6 +21,8 @@ var mainMenuState = {
             }
 
         }, this, 2, 1, 0);
+
+
     },
     update: function (){
 

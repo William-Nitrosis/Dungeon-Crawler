@@ -46,7 +46,6 @@ var playerHealthBar = healthbarConfig = {
 };
 
 
-
 /* ====== start mainMenu state ====== */
 var testingGroundButton, debuggerButton, debugged;
 

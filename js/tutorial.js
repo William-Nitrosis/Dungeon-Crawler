@@ -25,7 +25,7 @@ var tutorialState = {
         this.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
 
         // player exit collision box
-        this.load.image('playerStartPoint', 'assets/tilesets/playerExitZone.png');
+        this.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
 
         // touch control
         game.input.addPointer();
@@ -89,18 +89,13 @@ var tutorialState = {
         playerHitTimer = game.time.create(false);
         playerAttackTimer = game.time.create(false);
 
-        // spawn zones and ai spawning
-        //console.log(this.findObjectsByType("spawnZone", level1));
 
         // code for Tiled objects
-        // enemies
+        // Spawning enemies
         this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
-            //console.log(zone.properties.type);
-
             if (zone.properties.type === "spawnZone") {
                 switch (zone.properties.enemy) {
                     case "slime":
-                        //console.log(zone.properties.count);
 
                         for (var i = 0; i < zone.properties.count; i++){
                             var spawnX = game.rnd.integerInRange(zone.x, zone.x + zone.width);
@@ -132,9 +127,9 @@ var tutorialState = {
             player.animations.play('idle');
         });
 
+        // Spawning exit
         this.findObjectsByType("playerExit", level1).forEach(function(zone) {
-            console.log(zone);
-            playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerStartPoint');
+            playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerExitPoint');
             playerExitZone.enableBody = true;
             game.physics.arcade.enable(playerExitZone);
 
@@ -303,25 +298,12 @@ var tutorialState = {
     damagePlayer: function (x, src) {
         if (playerInvulnerable === false) { // checks if the player can take damage
             playerHealth -= src.dmg;
-            console.log(playerHealth);
             playerInvulnerable = true;
             player.tint = 0xff4444;
             playerHitTimer.loop(500, function(){ playerInvulnerable = false; player.tint = 0xffffff; playerHitTimer.stop(true);});
             playerHitTimer.start();
-        } else if (playerHealth <= 0) { // game over screen and styles for console log
-            var styles = [
-                'background: linear-gradient(#D33106, #571402)'
-                , 'border: 1px solid #3E0E02'
-                , 'color: white'
-                , 'display: block'
-                , 'text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3)'
-                , 'box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 5px 3px -5px rgba(0, 0, 0, 0.5), 0 -13px 5px -10px rgba(255, 255, 255, 0.4) inset'
-                , 'line-height: 40px'
-                , 'text-align: center'
-                , 'font-weight: bold'
-            ].join(';');
-
-            console.log('%c PLAYER DEAD \n GAME OVER', styles);
+        } else if (playerHealth <= 0) {
+            console.log("Player dead \n Health 0");
             game.paused = true;
         }
     },
@@ -405,7 +387,6 @@ var tutorialState = {
     hitAi: function (source, enemy) {
         if (enemy.hit === false) { // checks if the ai can be hit
             enemy.health -= playerWeaponStats.dmg;
-            console.log(enemy.health);
             enemy.hit = true;
             enemy.tint = 0xff4444;
             enemy.stunned = true;
