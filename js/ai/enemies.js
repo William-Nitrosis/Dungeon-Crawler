@@ -12,6 +12,10 @@ function spawnSlime(spawnX, spawnY) {
     ai.losRange = 20;
     ai.inRange = false;
     ai.canSee = false;
+    ai.knockBackLine = new Phaser.Line();
+
+    ai.knockBackTimer = game.time.create(false);
+    ai.hitTimer = game.time.create(false);
 
 // styling for the ai health bar
     aiHealthBar = {
