@@ -403,7 +403,7 @@ var tutorialState = {
             game.physics.arcade.moveToXY(enemy, enemy.knockBackLine.end.x, enemy.knockBackLine.end.y, playerWeaponStats.knockBack);
 
 
-            enemy.knockBackTimer.loop(200, function() { // timer settings
+            enemy.knockBackTimer.loop(playerWeaponStats.knockBackDuration, function() { // timer settings
                 enemy.stunned = false;
                 enemy.knockBackTimer.stop(true);
             });

@@ -8,5 +8,6 @@ var ironSword = {
     image:"assets/weapons/swords/ironSword.png",
     rangeX:65,
     rangeY:100,
-    knockBack:300
+    knockBack:300,
+    knockBackDuration:100
 };
