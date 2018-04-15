@@ -413,14 +413,13 @@ var tutorialState = {
             enemy.hitTimer.loop(1000, function() { // timer settings
                 enemy.tint = 0xffffff;
                 enemy.hit = false;
-                enemy.stunned = false;
                 enemy.hitTimer.stop(true);
             });
 
             enemy.knockBackLine.start.set(enemy.x, enemy.y + (enemy.height / 4));
             enemy.knockBackLine.end.set(source.x, source.y);
             enemy.knockBackLine.rotateAround(enemy.x, enemy.y + (enemy.height / 4), 180, true);
-            game.physics.arcade.moveToXY(enemy, enemy.knockBackLine.end.x, enemy.knockBackLine.end.y, 300);
+            game.physics.arcade.moveToXY(enemy, enemy.knockBackLine.end.x, enemy.knockBackLine.end.y, playerWeaponStats.knockBack);
 
 
             enemy.knockBackTimer.loop(200, function() { // timer settings

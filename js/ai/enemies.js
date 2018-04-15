@@ -4,8 +4,8 @@ function spawnSlime(spawnX, spawnY) {
     ai.anchor.setTo(.5,.5);
     ai.body.setSize(45, 47, 27, 49);
     ai.dmg = 15;
-    ai.maxHealth = 10;
-    ai.health = 10;
+    ai.maxHealth = 15;
+    ai.health = 15;
     ai.hit = false;
     ai.stunned = false;
     ai.line = new Phaser.Line();

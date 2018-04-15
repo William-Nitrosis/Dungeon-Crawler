@@ -7,5 +7,6 @@ var ironSword = {
     attackSpeed:500,
     image:"assets/weapons/swords/ironSword.png",
     rangeX:65,
-    rangeY:100
+    rangeY:100,
+    knockBack:300
 };
