@@ -13,7 +13,7 @@ var tutorialState = {
 
         // map tiles stuff
         game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
-        game.load.tilemap('level1', 'assets/tilesets/DungeonTest.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.tilemap('level1', 'assets/tilesets/levelTheFirst.json', null, Phaser.Tilemap.TILED_JSON);
 
         // timing
         game.time.advancedTiming = true;
@@ -26,6 +26,9 @@ var tutorialState = {
 
         // player exit collision box
         this.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
+
+        // load items
+        this.load.spritesheet('dungeonKey', 'assets/items/keyGold.png', 24, 24, 4);
 
         // touch control
         game.input.addPointer();
@@ -68,7 +71,7 @@ var tutorialState = {
 
 
         // path finding
-        walkables = [41,42,43,44,54,55,28,29,30,31,23,24];
+        walkables = [41,42,43,44,54,55,28,29,30,31,23,24,56,57];
         pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
         pathfinder.setGrid(level1.layers[1].data, walkables);
 
@@ -125,6 +128,9 @@ var tutorialState = {
             player.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 7, '', 4), 15, true);
             player.animations.add('idle', Phaser.Animation.generateFrameNames('idle', 0, 1, '', 4), 2, true);
             player.animations.play('idle');
+
+            // player keys
+            player.keys = [];
         });
 
         // Spawning exit
@@ -143,6 +149,8 @@ var tutorialState = {
         // collisions and calls
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, enemies);
+        game.physics.arcade.collide(wallsLayer, dungeonKey);
+        game.physics.arcade.overlap(player, dungeonKey, this.collectKey);
         game.physics.arcade.overlap(playerExitZone, player, this.endLevel);
         game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
@@ -231,6 +239,13 @@ var tutorialState = {
         // UI updates
         playerHealthBar.setPercent(playerHealth * (100 / playerMaxHealth));
 
+        if (typeof dungeonKey !== 'undefined' && dungeonKeyAnimPlayed === false) {
+            if (dungeonKey.body.velocity.x === 0 && dungeonKey.body.velocity.y === 0) {
+                dungeonKeyAnim.play();
+                dungeonKeyAnimPlayed =! dungeonKeyAnimPlayed;
+            }
+        }
+
     },
     render: function () {
         // -- debugging code
@@ -265,7 +280,7 @@ var tutorialState = {
             game.physics.arcade.moveToXY(enemy, path[3].x*48, path[3].y*48, 100);
         } else if (path.length >= 3) {
             game.physics.arcade.moveToXY(enemy, path[2].x * 48, path[2].y * 48, 100);
-        } else {
+        } else if (path.length >= 2) {
             game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
         }
 
@@ -414,8 +429,7 @@ var tutorialState = {
         }
 
         if (enemy.health <= 0) { // kill the ai when their health is 0
-            enemy.healthBar.kill();
-            enemy.kill();
+            this.aiDead(enemy);
         }
     },
 
@@ -454,6 +468,34 @@ var tutorialState = {
     },
 
     endLevel: function () {
-        alert("Level complete");
+        if (player.keys.includes("gold")) {
+            console.log("end");
+        } else {
+            alert("Collect the Golden key to unlock the next Dungeon");
+        }
+    },
+
+    aiDead: function (enemy) {
+        enemy.healthBar.kill();
+        enemy.kill();
+        if (enemies.countLiving() === 6) {
+            dungeonKey = game.add.sprite(enemy.x, enemy.y, 'dungeonKey');
+            dungeonKeyAnim = dungeonKey.animations.add('bounce', [0,1,2,3], 6, true);
+            dungeonKey.enableBody = true;
+            game.physics.arcade.enable(dungeonKey);
+            dungeonKey.body.bounce.set(0.8);
+            dungeonKey.body.drag.x = 100;
+            dungeonKey.body.drag.y = 100;
+
+            var keyDirection = game.rnd.integerInRange(1, 360);
+            game.physics.arcade.velocityFromAngle(keyDirection, 300, dungeonKey.body.velocity);
+
+        }
+    },
+
+    collectKey: function () {
+        dungeonKey.kill();
+        player.keys.push("gold");
+        alert("Gold key collected");
     }
 };
