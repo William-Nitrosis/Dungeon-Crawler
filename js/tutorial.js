@@ -1,3 +1,4 @@
+// noinspection ES6ConvertVarToLetConst
 var tutorialState = {
     preload: function () {
         // make everything CRISP
@@ -24,11 +25,13 @@ var tutorialState = {
         this.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
         this.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
 
+        this.load.image('healthAndKeys', 'assets/ui/healthAndKeys.png');
+
         // player exit collision box
         this.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
 
         // load items
-        this.load.spritesheet('dungeonKey', 'assets/items/keyGold.png', 24, 24, 4);
+        this.load.spritesheet('dungeonKeyGold', 'assets/items/keyGold.png', 24, 24, 4);
 
         // touch control
         game.input.addPointer();
@@ -99,7 +102,6 @@ var tutorialState = {
             if (zone.properties.type === "spawnZone") {
                 switch (zone.properties.enemy) {
                     case "slime":
-
                         for (var i = 0; i < zone.properties.count; i++){
                             var spawnX = game.rnd.integerInRange(zone.x, zone.x + zone.width);
                             var spawnY = game.rnd.integerInRange(zone.y, zone.y + zone.height);
@@ -131,6 +133,7 @@ var tutorialState = {
 
             // player keys
             player.keys = [];
+            keys = game.add.group();
         });
 
         // Spawning exit
@@ -138,19 +141,32 @@ var tutorialState = {
             playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerExitPoint');
             playerExitZone.enableBody = true;
             game.physics.arcade.enable(playerExitZone);
-
-
         });
 
+        // UI
+        healthAndKeys = game.add.sprite(10, 15, 'healthAndKeys');
+        healthAndKeys.fixedToCamera = true;
 
+        // -- key text
+        copperKeyText = game.add.text(317, 73, dungeonKeyCopperCount, dungeonKeyStyle);
+        bronzerKeyText = game.add.text(366, 73, dungeonKeyBronzeCount, dungeonKeyStyle);
+        silverKeyText = game.add.text(411, 73, dungeonKeySilverCount, dungeonKeyStyle);
+        goldKeyText = game.add.text(455, 73, dungeonKeyGoldCount, dungeonKeyStyle);
+        platKeyText = game.add.text(500, 73, dungeonKeyPlatCount, dungeonKeyStyle);
+        copperKeyText.fixedToCamera = true;
+        bronzerKeyText.fixedToCamera = true;
+        silverKeyText.fixedToCamera = true;
+        goldKeyText.fixedToCamera = true;
+        platKeyText.fixedToCamera = true;
 
+        this.updateKeyUI();
     },
     update: function (){
         // collisions and calls
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, enemies);
         game.physics.arcade.collide(wallsLayer, dungeonKey);
-        game.physics.arcade.overlap(player, dungeonKey, this.collectKey);
+        game.physics.arcade.overlap(player, keys, this.collectKey);
         game.physics.arcade.overlap(playerExitZone, player, this.endLevel);
         game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
@@ -230,8 +246,6 @@ var tutorialState = {
             enemy.healthBar.setPosition(enemy.x, enemy.y);
         }, this);
 
-
-
         // update player weapon position
         playerWeapon.x = player.x;
         playerWeapon.y = player.y + 10;
@@ -239,6 +253,8 @@ var tutorialState = {
         // UI updates
         playerHealthBar.setPercent(playerHealth * (100 / playerMaxHealth));
 
+
+        // Item updates
         if (typeof dungeonKey !== 'undefined' && dungeonKeyAnimPlayed === false) {
             if (dungeonKey.body.velocity.x === 0 && dungeonKey.body.velocity.y === 0) {
                 dungeonKeyAnim.play();
@@ -479,23 +495,47 @@ var tutorialState = {
         enemy.healthBar.kill();
         enemy.kill();
         if (enemies.countLiving() === 6) {
-            dungeonKey = game.add.sprite(enemy.x, enemy.y, 'dungeonKey');
-            dungeonKeyAnim = dungeonKey.animations.add('bounce', [0,1,2,3], 6, true);
-            dungeonKey.enableBody = true;
-            game.physics.arcade.enable(dungeonKey);
-            dungeonKey.body.bounce.set(0.8);
-            dungeonKey.body.drag.x = 100;
-            dungeonKey.body.drag.y = 100;
-
-            var keyDirection = game.rnd.integerInRange(1, 360);
-            game.physics.arcade.velocityFromAngle(keyDirection, 300, dungeonKey.body.velocity);
-
+            this.spawnKey(enemy, "dungeonKeyGold");
         }
+    },
+
+    spawnKey: function (enemy, key) {
+        dungeonKey = game.add.sprite(enemy.x, enemy.y, key);
+        dungeonKeyAnimPlayed = false;
+        dungeonKeyAnim = dungeonKey.animations.add('bounce', [0,1,2,3], 6, true);
+        dungeonKey.enableBody = true;
+        game.physics.arcade.enable(dungeonKey);
+        dungeonKey.body.bounce.set(0.8);
+        dungeonKey.body.drag.x = 100;
+        dungeonKey.body.drag.y = 100;
+        keys.add(dungeonKey);
+
+        var keyDirection = game.rnd.integerInRange(1, 360);
+        game.physics.arcade.velocityFromAngle(keyDirection, 150, dungeonKey.body.velocity);
     },
 
     collectKey: function () {
         dungeonKey.kill();
         player.keys.push("gold");
-        alert("Gold key collected");
+        tutorialState.updateKeyUI();
+    },
+
+    updateKeyUI: function () {
+
+
+        for (var i = 0; i <= player.keys.length; i++ ) {
+            if (player.keys[i] === "gold") {
+                dungeonKeyGoldCount++;
+                dungeonKeyUI = game.add.sprite(448, 32, 'dungeonKeyGold');
+                dungeonKeyUI.fixedToCamera = true;
+            }
+        }
+
+        copperKeyText.setText(dungeonKeyCopperCount);
+        bronzerKeyText.setText(dungeonKeyBronzeCount);
+        silverKeyText.setText(dungeonKeySilverCount);
+        goldKeyText.setText(dungeonKeyGoldCount);
+        platKeyText.setText(dungeonKeyPlatCount);
+
     }
 };

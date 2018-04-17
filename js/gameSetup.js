@@ -6,10 +6,19 @@ game.state.add('mainMenu', mainMenuState);
 game.state.add('tutorial', tutorialState);
 
 /* ====== global variable ====== */
-var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar, objectsLayer, playerExitZone, dungeonKey, dungeonKeyAnim;
+var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar, playerExitZone, dungeonKey, dungeonKeyAnim, healthAndKeys, keys, dungeonKeyUI;
 var dungeonKeyAnimPlayed = false;
 // walkables - defines what tiles in the layers the ai can path find over
 // pad and stick are the variables used to store the UI control sprites
+
+// keys
+var dungeonKeyStyle = { font: "12px Arial", fill: "#fff", boundsAlignH: "center"};
+var dungeonKeyCopperCount = 0;
+var dungeonKeyBronzeCount = 0;
+var dungeonKeySilverCount = 0;
+var dungeonKeyGoldCount = 0;
+var dungeonKeyPlatCount = 0;
+var copperKeyText, bronzerKeyText, silverKeyText, goldKeyText, platKeyText;
 
 
 var isBusy = false; // defines if the player sprite is currently busy playing an animation
