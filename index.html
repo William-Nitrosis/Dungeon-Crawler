@@ -7,6 +7,7 @@
             html, body {
                 margin: 0;
                 padding 0;
+                overflow: hidden;
             }
         </style>
         <script>
@@ -47,10 +48,10 @@
             if (window.innerHeight <= 500) {
                 canvasWidth = 1280;
                 canvasHeight = 720;
-            }/* else if (window.innerHeight >= 501) {
+            } else if (window.innerHeight >= 501) {
                 canvasWidth = 1600;
                 canvasHeight = 900;
-            }*/
+            }
 
 
             var game = "";
@@ -75,7 +76,7 @@
     </head>
     <body>
     <button id="launchGame" type="button" onclick="startGame()">Launch game</button>
-    <button id="fullscreenButton" type="button" onclick="toggleFullscreen(document.canvas)">Fullscreen</button>
+    <!--<button id="fullscreenButton" type="button" onclick="toggleFullscreen(document.canvas)">Fullscreen</button>-->
 
     <script>
         function startGame(){

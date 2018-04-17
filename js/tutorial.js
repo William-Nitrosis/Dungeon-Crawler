@@ -136,11 +136,26 @@ var tutorialState = {
             keys = game.add.group();
         });
 
-        // Spawning exit
+        // spawning exit
+        playerExitZones = game.add.group();
+        playerExitZones.enableBody = true;
+        game.physics.arcade.enable(playerExitZones);
+
         this.findObjectsByType("playerExit", level1).forEach(function(zone) {
             playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerExitPoint');
+            playerExitZone.keyType = zone.properties.keyType;
             playerExitZone.enableBody = true;
             game.physics.arcade.enable(playerExitZone);
+            playerExitZones.add(playerExitZone);
+        });
+
+        // spawning items
+        this.findObjectsByType("spawnItem", level1).forEach(function(zone) {
+            switch(zone.properties.item) {
+                case "dungeonKeyGold":
+                    tutorialState.spawnKey(zone, zone.properties.item, 0);
+                    break;
+            }
         });
 
         // UI
@@ -167,7 +182,7 @@ var tutorialState = {
         game.physics.arcade.collide(wallsLayer, enemies);
         game.physics.arcade.collide(wallsLayer, dungeonKey);
         game.physics.arcade.overlap(player, keys, this.collectKey);
-        game.physics.arcade.overlap(playerExitZone, player, this.endLevel);
+        game.physics.arcade.overlap(playerExitZones, player, this.endLevel);
         game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
 
@@ -462,8 +477,9 @@ var tutorialState = {
         enemy.animations.play('idle');
     },
 
-    endLevel: function () {
-        if (player.keys.includes("gold")) {
+    endLevel: function (player, zone) {
+        console.log(zone.keyType);
+        if (player.keys.includes(zone.keyType)) {
             console.log("end");
         } else {
             alert("Collect the Golden key to unlock the next Dungeon");
@@ -474,12 +490,12 @@ var tutorialState = {
         enemy.healthBar.kill();
         enemy.kill();
         if (enemies.countLiving() === 6) {
-            this.spawnKey(enemy, "dungeonKeyGold");
+            this.spawnKey(enemy, "dungeonKeyGold", 150);
         }
     },
 
-    spawnKey: function (enemy, key) {
-        dungeonKey = game.add.sprite(enemy.x, enemy.y, key);
+    spawnKey: function (point, key, vel) {
+        dungeonKey = game.add.sprite(point.x, point.y, key);
         dungeonKeyAnimPlayed = false;
         dungeonKeyAnim = dungeonKey.animations.add('bounce', [0,1,2,3], 6, true);
         dungeonKey.enableBody = true;
@@ -490,7 +506,7 @@ var tutorialState = {
         keys.add(dungeonKey);
 
         var keyDirection = game.rnd.integerInRange(1, 360);
-        game.physics.arcade.velocityFromAngle(keyDirection, 150, dungeonKey.body.velocity);
+        game.physics.arcade.velocityFromAngle(keyDirection, vel, dungeonKey.body.velocity);
     },
 
     collectKey: function () {
@@ -500,7 +516,7 @@ var tutorialState = {
     },
 
     updateKeyUI: function () {
-
+        dungeonKeyGoldCount = 0;
         for (var i = 0; i <= player.keys.length; i++ ) {
             if (player.keys[i] === "gold") {
                 dungeonKeyGoldCount++;

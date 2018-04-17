@@ -1,11 +1,10 @@
 var mainMenuState = {
     preload: function () {
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        //game.input.onDown.add(function(){
+        //    game.scale.startFullScreen();
+        //}, this);
 
-
-        game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
-        game.input.onDown.add(function(){
-            game.scale.startFullScreen();
-        }, this);
         //game.scale.setUserScale(window.innerWidth/ canvasWidth, window.innerHeight / canvasHeight);
 
 

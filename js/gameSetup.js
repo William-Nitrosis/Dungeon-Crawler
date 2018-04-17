@@ -1,12 +1,13 @@
 /* ====== create game object and canvas ====== */
-var game = new Phaser.Game(canvasWidth, canvasHeight, Phaser.CANVAS, 'gameCanvas');
+var game = new Phaser.Game(canvasWidth, canvasHeight, Phaser.CANVAS, '');
 
 /* ====== create game states ====== */
 game.state.add('mainMenu', mainMenuState);
 game.state.add('tutorial', tutorialState);
 
 /* ====== global variable ====== */
-var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar, playerExitZone, dungeonKey, dungeonKeyAnim, healthAndKeys, keys, dungeonKeyUI;
+var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer, playerWeapon, playerAttackTimer, aiHealthBar,
+    playerExitZone, dungeonKey, dungeonKeyAnim, healthAndKeys, keys, dungeonKeyUI, playerExitZones;
 var dungeonKeyAnimPlayed = false;
 // walkables - defines what tiles in the layers the ai can path find over
 // pad and stick are the variables used to store the UI control sprites
