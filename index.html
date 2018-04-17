@@ -9,6 +9,52 @@
                 padding 0;
             }
         </style>
+        <script>
+            // Find the right method, call on correct element
+            function toggleFullscreen(fullscreenElement) {
+                var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+                    (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+                    (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+                    (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+                var docElm = document.documentElement;
+                if (!isInFullScreen) {
+                    if (docElm.requestFullscreen) {
+                        docElm.requestFullscreen();
+                    } else if (docElm.mozRequestFullScreen) {
+                        docElm.mozRequestFullScreen();
+                    } else if (docElm.webkitRequestFullScreen) {
+                        docElm.webkitRequestFullScreen();
+                    } else if (docElm.msRequestFullscreen) {
+                        docElm.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+
+
+            var canvasWidth = 1280;
+            var canvasHeight = 720;
+            if (window.innerHeight <= 500) {
+                canvasWidth = 1280;
+                canvasHeight = 720;
+            }/* else if (window.innerHeight >= 501) {
+                canvasWidth = 1600;
+                canvasHeight = 900;
+            }*/
+
+
+            var game = "";
+        </script>
         <!-- FRAMEWORKS -->
         <script src="frameworks/phaser/phaser.min.js"></script>
         <script src="frameworks/HealthBar.js"></script>
@@ -22,14 +68,28 @@
         <!-- STATES -->
         <script src="js/mainMenu.js"></script>
         <script src="js/tutorial.js"></script>
+        <!--
         <script src="js/gameSetup.js"></script>
+        -->
 
     </head>
     <body>
+    <button id="launchGame" type="button" onclick="startGame()">Launch game</button>
+    <button id="fullscreenButton" type="button" onclick="toggleFullscreen(document.canvas)">Fullscreen</button>
 
-    <!--
-    <script src="js/main.js" type="text/javascript"></script>
-    -->
+    <script>
+        function startGame(){
+            var launchGameButton = document.getElementById('launchGame');
+            launchGameButton.parentNode.removeChild(launchGameButton);
 
+
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = "js/gameSetup.js";
+
+                document.getElementsByTagName("head")[0].appendChild(script);
+
+        }
+    </script>
     </body>
 </html>

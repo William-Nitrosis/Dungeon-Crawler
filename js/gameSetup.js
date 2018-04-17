@@ -1,5 +1,5 @@
 /* ====== create game object and canvas ====== */
-var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '');
+var game = new Phaser.Game(canvasWidth, canvasHeight, Phaser.CANVAS, 'gameCanvas');
 
 /* ====== create game states ====== */
 game.state.add('mainMenu', mainMenuState);

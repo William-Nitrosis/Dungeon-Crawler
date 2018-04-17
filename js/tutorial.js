@@ -20,18 +20,18 @@ var tutorialState = {
         game.time.advancedTiming = true;
 
         // ui
-        this.load.image('joystickBall', 'assets/ui/joystickBall.png');
-        this.load.image('joystickBackground', 'assets/ui/joystickBackground.png');
-        this.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
-        this.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
+        game.load.image('joystickBall', 'assets/ui/joystickBall.png');
+        game.load.image('joystickBackground', 'assets/ui/joystickBackground.png');
+        game.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
+        game.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
 
-        this.load.image('healthAndKeys', 'assets/ui/healthAndKeys.png');
+        game.load.image('healthAndKeys', 'assets/ui/healthAndKeys.png');
 
         // player exit collision box
-        this.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
+        game.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
 
         // load items
-        this.load.spritesheet('dungeonKeyGold', 'assets/items/keyGold.png', 24, 24, 4);
+        game.load.spritesheet('dungeonKeyGold', 'assets/items/keyGold.png', 24, 24, 4);
 
         // touch control
         game.input.addPointer();
@@ -41,7 +41,7 @@ var tutorialState = {
 
         // load player weapons
         playerWeaponStats = ironSword;
-        this.load.image('playerWeapon', playerWeaponStats.image);
+        game.load.image('playerWeapon', playerWeaponStats.image);
     },
     create: function (){
         // world setup
@@ -176,16 +176,15 @@ var tutorialState = {
         player.body.velocity.y = 0;
         isBusy = false;
 
-        // check for inputss
-        if (keyLeft.isDown) 	{ player.body.velocity.x = -playerMovementSpeed; player.scale.x = -1; player.animations.play('walk'); isBusy=true;}	// move left
-        if (keyRight.isDown) 	{ player.body.velocity.x = playerMovementSpeed; player.scale.x = 1; player.animations.play('walk'); isBusy=true;}		// move right
-        if (keyUp.isDown) 		{ player.body.velocity.y = -playerMovementSpeed; player.animations.play('walk'); isBusy=true;}	// move up
-        if (keyDown.isDown) 	{ player.body.velocity.y = playerMovementSpeed; player.animations.play('walk'); isBusy=true;}		// move down
-
         // check joystick inputs
         if (stick.isDown) {
             isBusy = true;
             this.physics.arcade.velocityFromRotation(stick.rotation, stick.force * playerMovementSpeed, player.body.velocity);
+        }
+
+        // check if the player is moving
+        if(stick.isUp) {
+            isBusy = false;
         }
 
         // flip player sprite
@@ -195,10 +194,12 @@ var tutorialState = {
             player.scale.x = -1;
         }
 
-        // check if the player is moving
-        if(stick.isUp) {
-            isBusy = false;
-        }
+        // check for inputss
+        if (keyLeft.isDown) 	{ player.body.velocity.x = -playerMovementSpeed; player.scale.x = -1; isBusy=true;}	// move left
+        if (keyRight.isDown) 	{ player.body.velocity.x = playerMovementSpeed; player.scale.x = 1; isBusy=true;}		// move right
+        if (keyUp.isDown) 		{ player.body.velocity.y = -playerMovementSpeed; isBusy=true;}	// move up
+        if (keyDown.isDown) 	{ player.body.velocity.y = playerMovementSpeed; isBusy=true;}		// move down`
+
 
         // check dpad input
         if (dpad.isDown) {
@@ -348,69 +349,47 @@ var tutorialState = {
             playerWeapon.visible = true;
             playerWeapon.body.setSize(0, 0, 0, 0);
 
+            var startAngle;
+            var endAngle;
+
+            playerWeapon.body.enable = true;
+
             switch (direction) {
                 case "right":
-                    playerWeapon.anchor.setTo(.5, 1.5); // set rotation point of weapon
                     playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0); // set collision box
-                    playerWeapon.angle = 0;
-                    game.add.tween(playerWeapon).to( { angle: 180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true); // animation only
-                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){ // timer settings for weapon duration
-                        if (playerAttacking === true) {
-                            playerWeapon.visible = false;
-                            playerAttacking = false;
-                            playerAttackTimer.stop(true);
-                            playerWeapon.body.setSize(0, 0, 0, 0);
-                        }
-                    });
-                    playerAttackTimer.start();
+                    startAngle = 0;
+                    endAngle = 180;
                     break;
                 case "left": // see comments for case right
-                    playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, -playerWeaponStats.rangeX, 0);
-                    playerWeapon.angle = 0;
-                    game.add.tween(playerWeapon).to( { angle: -180 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
-                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
-                        if (playerAttacking === true) {
-                            playerWeapon.visible = false;
-                            playerAttacking = false;
-                            playerAttackTimer.stop(true);
-                            playerWeapon.body.setSize(0, 0, 0, 0);
-                        }
-                    });
-                    playerAttackTimer.start();
+                    startAngle = 0;
+                    endAngle = -180;
                     break;
                 case "up": // see comments for case right
-                    playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, -20);
-                    playerWeapon.angle = -90;
-                    game.add.tween(playerWeapon).to( { angle: 90 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
-                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
-                        if (playerAttacking === true) {
-                            playerWeapon.visible = false;
-                            playerAttacking = false;
-                            playerAttackTimer.stop(true);
-                            playerWeapon.body.setSize(0, 0, 0, 0);
-                        }
-                    });
-                    playerAttackTimer.start();
+                    startAngle = -90;
+                    endAngle = 90;
                     break;
                 case "down": // see comments for case right
-                    playerWeapon.anchor.setTo(.5, 1.5);
                     playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, playerWeaponStats.rangeX);
-                    playerWeapon.angle = -90;
-                    game.add.tween(playerWeapon).to( { angle: -270 }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
-                    playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
-                        if (playerAttacking === true) {
-                            playerWeapon.visible = false;
-                            playerAttacking = false;
-                            playerAttackTimer.stop(true);
-                            playerWeapon.body.setSize(0, 0, 0, 0);
-                        }
-                    });
-                    playerAttackTimer.start();
+                    startAngle = -90;
+                    endAngle = -270;
                     break;
             }
 
+            playerWeapon.anchor.setTo(.5, 1.5);
+            playerWeapon.angle = startAngle;
+            game.add.tween(playerWeapon).to( { angle: endAngle }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
+            playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
+                if (playerAttacking === true) {
+                    playerWeapon.visible = false;
+                    playerAttacking = false;
+                    playerAttackTimer.stop(true);
+                    playerWeapon.body.setSize(0, 0, 0, 0);
+                    playerWeapon.body.enable = false;
+                }
+            });
+            playerAttackTimer.start();
         }
     },
 
@@ -521,7 +500,6 @@ var tutorialState = {
     },
 
     updateKeyUI: function () {
-
 
         for (var i = 0; i <= player.keys.length; i++ ) {
             if (player.keys[i] === "gold") {
