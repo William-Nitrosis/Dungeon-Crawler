@@ -1,11 +1,11 @@
 var mainMenuState = {
     preload: function () {
-        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        //game.input.onDown.add(function(){
-        //    game.scale.startFullScreen();
-        //}, this);
-
-        //game.scale.setUserScale(window.innerWidth/ canvasWidth, window.innerHeight / canvasHeight);
+        game.input.onDown.add(function(){
+            var scale = Math.min(window.innerWidth / game.width, window.innerHeight / game.height);
+            game.scale.setUserScale(scale,scale,0,0);
+            game.scale.startFullScreen();
+            game.scale.fullScreenScaleMode = Phaser.ScaleManager.USER_SCALE;
+        }, this);
 
 
         /* ====== start tutorial state ====== */
