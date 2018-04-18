@@ -220,3 +220,7 @@ function aiDead(enemy) {
         spawnKey(enemy, "dungeonKeyGold", 150);
     }
 }
+function xpToNextLevel(player) {
+    var lvl = player.level + 1;
+    return Math.round(((4 * Math.pow(lvl,3)) / 5) - player.xp);
+}

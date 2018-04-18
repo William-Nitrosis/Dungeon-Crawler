@@ -13,7 +13,6 @@ var loadState = {
 
         // map tiles stuff
         game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
-        game.load.tilemap('map', 'assets/tilesets/levelTheSecond.json', null, Phaser.Tilemap.TILED_JSON);
 
         // timing
         game.time.advancedTiming = true;

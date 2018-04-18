@@ -1,14 +1,13 @@
 var mainMenuState = {
     preload: function () {
-        game.input.onDown.add(function(){
-            var scale = Math.min(window.innerWidth / game.width, window.innerHeight / game.height);
-            game.scale.setUserScale(scale,scale,0,0);
-            game.scale.startFullScreen();
-            game.scale.fullScreenScaleMode = Phaser.ScaleManager.USER_SCALE;
-        }, this);
-
-
-        /* ====== start tutorial state ====== */
+        if (fullscreenEnabled === true) {
+            game.input.onDown.add(function(){
+                var scale = Math.min(window.innerWidth / game.width, window.innerHeight / game.height);
+                game.scale.setUserScale(scale,scale,0,0);
+                game.scale.startFullScreen();
+                game.scale.fullScreenScaleMode = Phaser.ScaleManager.USER_SCALE;
+            }, this);
+        }
 
         // load ui
         game.load.spritesheet('newGameButton', 'assets/ui/newGameButton.png', 200, 100);
@@ -20,7 +19,7 @@ var mainMenuState = {
     },
     create: function (){
         testingGroundButton = game.add.button(game.world.centerX - 100, game.world.centerY - 250, 'newGameButton', function(){
-            game.state.start('tutorial');
+            game.state.start('play');
             }, this, 2, 1, 0);
 
         debuggerButton = game.add.button(game.world.centerX - 100, game.world.centerY - 100, 'debuggedButton', function(){
@@ -36,11 +35,17 @@ var mainMenuState = {
 
         optionsButton = game.add.button(game.world.centerX - 100, game.world.centerY + 50, 'optionsButton', this.openOptions, this, 2, 1, 0);
 
+        var resStyle = { font: "18px Arial", fill: "#00ff00", align: "center"};
+        resText = game.add.text(game.world.centerX, 30, ("Viewport res: \n" + canvasWidth + " x " + canvasHeight), resStyle);
+        resText.anchor.setTo(0.5);
+
+        resTextCurrent = game.add.text(game.world.centerX, 80, ("Current res: \n" + window.innerWidth + " x " + window.innerHeight), resStyle);
+        resTextCurrent.anchor.setTo(0.5);
 
 
     },
     update: function (){
-
+        resTextCurrent.setText("Current res: \n" + window.innerWidth + " x " + window.innerHeight);
     },
 
     openOptions: function () {

@@ -1,6 +1,7 @@
 // noinspection ES6ConvertVarToLetConst
-var tutorialState = {
+var playState = {
     preload: function () {
+        game.load.tilemap('map', ('assets/tilesets/'+ loadLevel +'.json'), null, Phaser.Tilemap.TILED_JSON);
     },
     create: function (){
         // world setup
@@ -94,6 +95,11 @@ var tutorialState = {
             // player keys
             player.keys = [];
             keys = game.add.group();
+
+            // player xp
+            player.xp = 60;
+            player.level = 5;
+            console.log(xpToNextLevel(player));
         });
 
         // spawning exit
