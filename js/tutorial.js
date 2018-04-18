@@ -1,47 +1,6 @@
 // noinspection ES6ConvertVarToLetConst
 var tutorialState = {
     preload: function () {
-        // make everything CRISP
-        game.camera.scale.x = 1;
-        game.camera.scale.y = 1;
-        game.stage.smoothed = false;
-
-        // Knight sheet and atlas
-        game.load.atlas('knightSheet', 'assets/characters/Knight/Knight_spritesheetX3.png', 'assets/characters/Knight/Knight.json');
-
-        // Slime sheet and atlas
-        game.load.atlas('slimeSheet', 'assets/ai/Slime/Slime_spritesheetX3.png', 'assets/ai/Slime/Slime.json');
-
-        // map tiles stuff
-        game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
-        game.load.tilemap('level1', 'assets/tilesets/levelTheSecond.json', null, Phaser.Tilemap.TILED_JSON);
-
-        // timing
-        game.time.advancedTiming = true;
-
-        // ui
-        game.load.image('joystickBall', 'assets/ui/joystickBall.png');
-        game.load.image('joystickBackground', 'assets/ui/joystickBackground.png');
-        game.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
-        game.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
-
-        game.load.image('healthAndKeys', 'assets/ui/healthAndKeys.png');
-
-        // player exit collision box
-        game.load.image('playerExitPoint', 'assets/tilesets/playerExitZone.png');
-
-        // load items
-        game.load.spritesheet('dungeonKeyGold', 'assets/items/keyGold.png', 24, 24, 4);
-
-        // touch control
-        game.input.addPointer();
-        game.input.addPointer();
-        game.input.addPointer();
-        game.input.addPointer();
-
-        // load player weapons
-        playerWeaponStats = ironSword;
-        game.load.image('playerWeapon', playerWeaponStats.image);
     },
     create: function (){
         // world setup
@@ -50,15 +9,15 @@ var tutorialState = {
         cursors = game.input.keyboard.createCursorKeys();
 
         // render tiled level map
-        level1 = game.add.tilemap('level1'); // step 1
-        level1.addTilesetImage('DungeonTiles', 'mapTiles'); // step 2
-        background = level1.createLayer('background');
-        floor = level1.createLayer('floor');
-        floorOverlay = level1.createLayer('floorOverlay');
-        wallsLayer = level1.createLayer('walls');
-        //objectsLayer = level1.createLayer('objects');
+        map = game.add.tilemap('map'); // step 1
+        map.addTilesetImage('DungeonTiles', 'mapTiles'); // step 2
+        background = map.createLayer('background');
+        floor = map.createLayer('floor');
+        floorOverlay = map.createLayer('floorOverlay');
+        wallsLayer = map.createLayer('walls');
+        //objectsLayer = map.createLayer('objects');
         background.resizeWorld();
-        level1.setCollisionBetween(1, 3078, true, 'walls');
+        map.setCollisionBetween(1, 3078, true, 'walls');
 
         // spawn ai
         enemies = game.add.group();
@@ -76,7 +35,7 @@ var tutorialState = {
         // path finding
         walkables = [41,42,43,44,54,55,28,29,30,31,23,24,56,57];
         pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
-        pathfinder.setGrid(level1.layers[1].data, walkables);
+        pathfinder.setGrid(map.layers[1].data, walkables);
 
         // joystick
         pad = game.plugins.add(Phaser.VirtualJoystick);
@@ -98,7 +57,7 @@ var tutorialState = {
 
         // code for Tiled objects
         // Spawning enemies
-        this.findObjectsByType("spawnZone", level1).forEach(function(zone) {
+        findObjectsByType("spawnZone", map).forEach(function(zone) {
             if (zone.properties.type === "spawnZone") {
                 switch (zone.properties.enemy) {
                     case "slime":
@@ -111,8 +70,9 @@ var tutorialState = {
             }
         });
 
+
         // Spawning player
-        this.findObjectsByType("playerSpawn", level1).forEach(function(zone) {
+        findObjectsByType("playerSpawn", map).forEach(function(zone) {
             // spawn and setup player, camera
             player = game.add.sprite(zone.x + (zone.width / 2), zone.y + (zone.height / 2), 'knightSheet');
             game.physics.arcade.enable(player);
@@ -141,7 +101,7 @@ var tutorialState = {
         playerExitZones.enableBody = true;
         game.physics.arcade.enable(playerExitZones);
 
-        this.findObjectsByType("playerExit", level1).forEach(function(zone) {
+        findObjectsByType("playerExit", map).forEach(function(zone) {
             playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerExitPoint');
             playerExitZone.keyType = zone.properties.keyType;
             playerExitZone.enableBody = true;
@@ -150,7 +110,7 @@ var tutorialState = {
         });
 
         // spawning items
-        this.findObjectsByType("spawnItem", level1).forEach(function(zone) {
+        findObjectsByType("spawnItem", map).forEach(function(zone) {
             switch(zone.properties.item) {
                 case "dungeonKeyGold":
                     spawnKey(zone, zone.properties.item, 0);
@@ -174,17 +134,17 @@ var tutorialState = {
         goldKeyText.fixedToCamera = true;
         platKeyText.fixedToCamera = true;
 
-        this.updateKeyUI();
+        updateKeyUI();
     },
     update: function (){
         // collisions and calls
         game.physics.arcade.collide(wallsLayer, player);
         game.physics.arcade.collide(wallsLayer, enemies);
         game.physics.arcade.collide(wallsLayer, keys);
-        game.physics.arcade.overlap(player, keys, this.collectKey, null, this, this);
-        game.physics.arcade.overlap(playerExitZones, player, this.endLevel);
-        game.physics.arcade.overlap(enemies, player, this.damagePlayer, null, this);
-        game.physics.arcade.overlap(enemies, playerWeapon, this.hitAi, null, this);
+        game.physics.arcade.overlap(player, keys, collectKey, null, this, this);
+        game.physics.arcade.overlap(playerExitZones, player, endLevel);
+        game.physics.arcade.overlap(enemies, player, damagePlayer, null, this);
+        game.physics.arcade.overlap(enemies, playerWeapon, hitAi, null, this);
 
         // reset players physics movement variable
         player.body.velocity.x = 0;
@@ -210,8 +170,8 @@ var tutorialState = {
         }
 
         // check for inputss
-        if (keyLeft.isDown) 	{ player.body.velocity.x = -playerMovementSpeed; player.scale.x = -1; isBusy=true;}	// move left
-        if (keyRight.isDown) 	{ player.body.velocity.x = playerMovementSpeed; player.scale.x = 1; isBusy=true;}		// move right
+        if (keyLeft.isDown) 	{ player.body.velocity.x = -playerMovementSpeed; player.scale.x = -1; isBusy=true}	// move left
+        if (keyRight.isDown) 	{ player.body.velocity.x = playerMovementSpeed; player.scale.x = 1; isBusy=true}		// move right
         if (keyUp.isDown) 		{ player.body.velocity.y = -playerMovementSpeed; isBusy=true;}	// move up
         if (keyDown.isDown) 	{ player.body.velocity.y = playerMovementSpeed; isBusy=true;}		// move down`
 
@@ -220,13 +180,13 @@ var tutorialState = {
         if (dpad.isDown) {
             // call attack function
             if (dpad.direction === Phaser.LEFT) {
-                this.playerAttackMeele("left");
+                playerAttackMeele("left");
             } else if (dpad.direction === Phaser.RIGHT) {
-                this.playerAttackMeele("right");
+                playerAttackMeele("right");
             } else if (dpad.direction === Phaser.UP) {
-                this.playerAttackMeele("up");
+                playerAttackMeele("up");
             } else if (dpad.direction === Phaser.DOWN) {
-                this.playerAttackMeele("down");
+                playerAttackMeele("down");
             }
         }
 
@@ -252,9 +212,9 @@ var tutorialState = {
             enemy.line.end.set(player.x, player.y);
 
             // move setup pathing
-            if (enemy.stunned === false && this.lineSight(enemy.line, enemy.losRange, enemy)) {
-                path = this.findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
-                this.pathSetup(enemy);
+            if (enemy.stunned === false && lineSight(enemy.line, enemy.losRange, enemy)) {
+                path = findPathTo(enemy, floor.getTileX(player.x+20), floor.getTileY(player.y+32));
+                pathSetup(enemy);
             }
 
             // scale enemy health bar and update position
@@ -268,7 +228,6 @@ var tutorialState = {
 
         // UI updates
         playerHealthBar.setPercent(playerHealth * (100 / playerMaxHealth));
-
 
         // Item updates
         if (typeof dungeonKey !== 'undefined' && dungeonKeyAnimPlayed === false) {
@@ -304,217 +263,5 @@ var tutorialState = {
         }
 
         // -- end debugging code
-    },
-
-   // move the enemies along the path
-    pathSetup: function (enemy) {
-        if (path.length >= 4) {
-            game.physics.arcade.moveToXY(enemy, path[3].x*48, path[3].y*48, 100);
-        } else if (path.length >= 3) {
-            game.physics.arcade.moveToXY(enemy, path[2].x * 48, path[2].y * 48, 100);
-        } else if (path.length >= 2) {
-            game.physics.arcade.moveToXY(enemy, path[1].x*48, path[1].y*48, 100);
-        }
-
-        // flip enemy sprite
-        if (enemy.x > player.x) {
-            enemy.scale.x = -1;
-        } else {
-            enemy.scale.x = 1;
-        }
-
-
-    },
-
-    // run path finding algorithm to calculate the path to follow
-    findPathTo: function (enemy, tilex, tiley) {
-        var goodPath = [];
-
-        pathfinder.setCallbackFunction(function(path) {
-            path = path || [];
-            goodPath = path;
-        });
-
-        pathfinder.preparePathCalculation([floor.getTileX(enemy.x),floor.getTileY(enemy.y)], [tilex,tiley]);
-        pathfinder.calculatePath();
-
-        return goodPath;
-    },
-
-    // function to apply damage to the player
-    damagePlayer: function (x, src) {
-        if (playerInvulnerable === false) { // checks if the player can take damage
-            playerHealth -= src.dmg;
-            playerInvulnerable = true;
-            player.tint = 0xff4444;
-            playerHitTimer.loop(500, function(){ playerInvulnerable = false; player.tint = 0xffffff; playerHitTimer.stop(true);});
-            playerHitTimer.start();
-        } else if (playerHealth <= 0) {
-            console.log("Player dead \n Health 0");
-            game.paused = true;
-        }
-    },
-
-    // function for the player melee attacking
-    playerAttackMeele: function (direction) {
-        if (playerAttacking === false) { // check if the player can attack
-            playerAttacking = true;
-            playerWeapon.x = player.x;
-            playerWeapon.y = player.y + 10;
-            playerWeapon.visible = true;
-            playerWeapon.body.setSize(0, 0, 0, 0);
-
-            var startAngle;
-            var endAngle;
-
-            playerWeapon.body.enable = true;
-
-            switch (direction) {
-                case "right":
-                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, 0, 0); // set collision box
-                    startAngle = 0;
-                    endAngle = 180;
-                    break;
-                case "left": // see comments for case right
-                    playerWeapon.body.setSize(playerWeaponStats.rangeX, playerWeaponStats.rangeY, -playerWeaponStats.rangeX, 0);
-                    startAngle = 0;
-                    endAngle = -180;
-                    break;
-                case "up": // see comments for case right
-                    playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, -20);
-                    startAngle = -90;
-                    endAngle = 90;
-                    break;
-                case "down": // see comments for case right
-                    playerWeapon.body.setSize(playerWeaponStats.rangeY, playerWeaponStats.rangeX, -playerWeaponStats.rangeY / 2.1, playerWeaponStats.rangeX);
-                    startAngle = -90;
-                    endAngle = -270;
-                    break;
-            }
-
-            playerWeapon.anchor.setTo(.5, 1.5);
-            playerWeapon.angle = startAngle;
-            game.add.tween(playerWeapon).to( { angle: endAngle }, playerWeaponStats.animSpeed, Phaser.Easing.Linear.None, true);
-            playerAttackTimer.loop(playerWeaponStats.attackSpeed, function(){
-                if (playerAttacking === true) {
-                    playerWeapon.visible = false;
-                    playerAttacking = false;
-                    playerAttackTimer.stop(true);
-                    playerWeapon.body.setSize(0, 0, 0, 0);
-                    playerWeapon.body.enable = false;
-                }
-            });
-            playerAttackTimer.start();
-        }
-    },
-
-    // function for the ai taking damage
-    hitAi: function (source, enemy) {
-        if (enemy.hit === false) { // checks if the ai can be hit
-            enemy.health -= playerWeaponStats.dmg;
-            enemy.hit = true;
-            enemy.tint = 0xff4444;
-            enemy.stunned = true;
-
-            enemy.hitTimer.loop(1000, function() { // timer settings
-                enemy.tint = 0xffffff;
-                enemy.hit = false;
-                enemy.hitTimer.stop(true);
-            });
-
-            enemy.knockBackLine.start.set(enemy.x, enemy.y + (enemy.height / 4));
-            enemy.knockBackLine.end.set(source.x, source.y);
-            enemy.knockBackLine.rotateAround(enemy.x, enemy.y + (enemy.height / 4), 180, true);
-            game.physics.arcade.moveToXY(enemy, enemy.knockBackLine.end.x, enemy.knockBackLine.end.y, playerWeaponStats.knockBack);
-
-
-            enemy.knockBackTimer.loop(playerWeaponStats.knockBackDuration, function() { // timer settings
-                enemy.stunned = false;
-                enemy.knockBackTimer.stop(true);
-            });
-
-
-            enemy.hitTimer.start();
-            enemy.knockBackTimer.start();
-        }
-
-        if (enemy.health <= 0) { // kill the ai when their health is 0
-            this.aiDead(enemy);
-        }
-    },
-
-    // testing script to debug Tiled map objects -- not finished
-    findObjectsByType: function(type, map) {
-        var objectArr = [];
-        map.objects.objects.forEach(function(obj){ //Check each object found in layer.
-
-            if(obj.properties.type === type){ //Check if the type of this object matches with the one we want.
-                obj.y -= map.tileHeight; //Phaser counts from top down, Tiled counts from bottom up.
-                objectArr.push(obj); //Push obj into objectArr.
-            }
-        });
-        return objectArr;
-    },
-
-    lineSight: function (line, range, enemy) {
-        enemy.inRange = false;
-        enemy.canSee = true;
-        tileHits = wallsLayer.getRayCastTiles(line, 4, false, false);
-        if(tileHits.length <= range){
-            enemy.inRange = true;
-            tileHits.forEach(function(element){
-                if(element.index !== -1){
-                    enemy.canSee = false;
-                }
-            });
-        }
-
-
-        if (enemy.inRange === true && enemy.canSee === true) {
-            enemy.animations.play('walk');
-            return true;
-        }
-        enemy.animations.play('idle');
-    },
-
-    endLevel: function (player, zone) {
-        console.log(zone.keyType);
-        if (player.keys.includes(zone.keyType)) {
-            console.log("end");
-        } else {
-            console.log("no end");
-        }
-    },
-
-    aiDead: function (enemy) {
-        enemy.healthBar.kill();
-        enemy.kill();
-        if (enemies.countLiving() === 6) {
-            spawnKey(enemy, "dungeonKeyGold", 150);
-        }
-    },
-
-    collectKey: function (player, key) {
-        key.kill();
-        player.keys.push("gold");
-        tutorialState.updateKeyUI();
-    },
-
-    updateKeyUI: function () {
-        dungeonKeyGoldCount = 0;
-        for (var i = 0; i <= player.keys.length; i++ ) {
-            if (player.keys[i] === "gold") {
-                dungeonKeyGoldCount++;
-                dungeonKeyUI = game.add.sprite(448, 32, 'dungeonKeyGold');
-                dungeonKeyUI.fixedToCamera = true;
-            }
-        }
-
-        copperKeyText.setText(dungeonKeyCopperCount);
-        bronzerKeyText.setText(dungeonKeyBronzeCount);
-        silverKeyText.setText(dungeonKeySilverCount);
-        goldKeyText.setText(dungeonKeyGoldCount);
-        platKeyText.setText(dungeonKeyPlatCount);
-
     }
 };

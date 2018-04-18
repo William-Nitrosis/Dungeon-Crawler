@@ -43,9 +43,10 @@
         <!-- STATES -->
         <script src="js/mainMenu.js"></script>
         <script src="js/tutorial.js"></script>
-
+        <script src="js/boot.js"></script>
+        <!--
         <script src="js/gameSetup.js"></script>
-
+        -->
 
     </head>
     <body>
@@ -53,17 +54,19 @@
 
     <script>
         function startGame(){
-            var launchGameButton = document.getElementById('launchGame');
-            launchGameButton.parentNode.removeChild(launchGameButton);
 
 
             var script = document.createElement("script");
             script.type = "text/javascript";
             script.src = "js/gameSetup.js";
 
+            window.setTimeout(function (){
                 document.getElementsByTagName("head")[0].appendChild(script);
+            },0);
+
 
         }
+        startGame();
     </script>
     </body>
 </html>

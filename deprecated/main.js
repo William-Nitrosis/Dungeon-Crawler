@@ -1,7 +1,7 @@
 //window.onload = function() {
 
     /* ====== global variable ====== */
-    var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, level1, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer;
+    var player, keyboard, keyLeft, keyRight, keyDown, keyUp, wallsLayer, map, background, floor, floorOverlay, ai, pathfinder, walkables, path, pad, stick, playerHitTimer;
     var isBusy = false;
     var playerInvulnerable = false;
 
@@ -45,7 +45,7 @@
 
         // map tiles stuff
         game.load.image('mapTiles', 'assets/tilesets/DarkDungeonv2_3x.png');
-        game.load.tilemap('level1', 'assets/tilesets/DungeonTest.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.tilemap('map', 'assets/tilesets/DungeonTest.json', null, Phaser.Tilemap.TILED_JSON);
 
         // timing
         game.time.advancedTiming = true;
@@ -72,14 +72,14 @@
         cursors = game.input.keyboard.createCursorKeys();
 
         // render tiled level map
-        level1 = game.add.tilemap('level1'); // step 1
-        level1.addTilesetImage('DungeonTiles', 'mapTiles'); // step 2
-        background = level1.createLayer('background');
-        floor = level1.createLayer('floor');
-        floorOverlay = level1.createLayer('floorOverlay');
-        wallsLayer = level1.createLayer('walls');
+        map = game.add.tilemap('map'); // step 1
+        map.addTilesetImage('DungeonTiles', 'mapTiles'); // step 2
+        background = map.createLayer('background');
+        floor = map.createLayer('floor');
+        floorOverlay = map.createLayer('floorOverlay');
+        wallsLayer = map.createLayer('walls');
         background.resizeWorld();
-        level1.setCollisionBetween(1, 3078, true, 'walls');
+        map.setCollisionBetween(1, 3078, true, 'walls');
 
         // spawn and setup player, camera
         player = game.add.sprite(1300, 830, 'knightSheet');
@@ -118,7 +118,7 @@
         // path finding
         walkables = [41,42,43,44,54,55,28,29,30,31,23,24];
         pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
-        pathfinder.setGrid(level1.layers[1].data, walkables);
+        pathfinder.setGrid(map.layers[1].data, walkables);
 
         // Joystick
         pad = game.plugins.add(Phaser.VirtualJoystick);
