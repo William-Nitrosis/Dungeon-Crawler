@@ -17,11 +17,15 @@ var loadState = {
         // timing
         game.time.advancedTiming = true;
 
-        // ui
+        // game ui
         game.load.image('joystickBall', 'assets/ui/joystickBall.png');
         game.load.image('joystickBackground', 'assets/ui/joystickBackground.png');
         game.load.atlas('arcade', 'assets/ui/arcade-joystick.png', 'assets/ui/arcade-joystick.json');
         game.load.atlas('dpad', 'assets/ui/dpad.png', 'assets/ui/dpad.json');
+
+        // main menu ui
+        game.load.spritesheet('uiButton', 'assets/ui/uiButton.png', 264, 68);
+        game.load.image('uiBackground', 'assets/ui/uiBackground.png');
 
         game.load.image('healthAndKeys', 'assets/ui/healthAndKeys.png');
 
@@ -42,6 +46,7 @@ var loadState = {
         game.load.image('playerWeapon', playerWeaponStats.image);
     },
     create: function () {
+
         game.state.start('mainMenu');
     }
 };

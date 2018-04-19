@@ -14,10 +14,8 @@
             var canvasWidth = 1280;
             var canvasHeight = 720;
             var fullscreenEnabled = false;
-            if (window.innerHeight <= 649) {
-                canvasWidth = 1280;
-                canvasHeight = 720;
-            } else if (window.innerHeight >= 650 && window.innerHeight <= 900) {
+
+            if (window.innerHeight >= 770 && window.innerHeight <= 900) {
                 canvasWidth = 1600;
                 canvasHeight = 900;
             } else if (window.innerHeight >= 900) {
@@ -42,9 +40,10 @@
         <script src="js/ai/enemies.js"></script>
 
         <!-- STATES -->
+        <script src="js/boot.js"></script>
         <script src="js/mainMenu.js"></script>
         <script src="js/play.js"></script>
-        <script src="js/boot.js"></script>
+
         <!--
         <script src="js/gameSetup.js"></script>
         -->

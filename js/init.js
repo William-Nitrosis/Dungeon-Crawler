@@ -224,3 +224,56 @@ function xpToNextLevel(player) {
     var lvl = player.level + 1;
     return Math.round(((4 * Math.pow(lvl,3)) / 5) - player.xp);
 }
+
+function createButton(x, y, text, call, context){
+    var button = game.add.button(x, y, 'uiButton', call, context, 2, 1, 0);
+    button.anchor.set(0.5);
+
+    var bStyle = { font: "18px Arial", fill: "#ffffff", align: "center"};
+    var bText = game.add.text(x, y, text, bStyle);
+    bText.anchor.setTo(0.5);
+
+    buttons.add(button);
+}
+
+function toggleDebugged(button) {
+    debugged = !debugged;
+
+    if (debugged) {
+        button.setFrames(0);
+    } else if (!debugged) {
+        button.setFrames(1);
+    }
+}
+
+function NewGameButton(){
+    game.state.start('play');
+}
+
+function openOptions() {
+    menuBackground = game.add.sprite(game.world.centerX, game.world.centerY, 'uiBackground');
+    menuBackground.anchor.set(0.5);
+    menuBackground.inputEnabled = true;
+    menuBackgroundOpen = true;
+
+}
+
+function interactOptionsMenu(click) {
+    if (menuBackgroundOpen) {
+        var left = menuBackground.x - (menuBackground.width / 2);
+        var right = menuBackground.x + (menuBackground.width / 2);
+        var top = menuBackground.y - (menuBackground.height / 2);
+        var bottom = menuBackground.y + (menuBackground.height / 2);
+
+        if (click.x > left && click.x < right && click.y > top && click.y < bottom) {
+            console.log("true");
+        } else {
+            menuBackground.destroy();
+            menuBackgroundOpen = false;
+        }
+    }
+
+
+
+
+}
