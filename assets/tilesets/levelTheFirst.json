@@ -78,12 +78,14 @@
                  "name":"",
                  "properties":
                     {
-                     "keyType":"gold",
+                     "keyType":"dungeonKeyGold",
+                     "nLevel":"levelTheSecond",
                      "type":"playerExit"
                     },
                  "propertytypes":
                     {
                      "keyType":"string",
+                     "nLevel":"string",
                      "type":"string"
                     },
                  "rotation":0,
@@ -120,12 +122,16 @@
                     {
                      "count":1,
                      "enemy":"slime",
+                     "specialDrop":"dungeonKeyGold",
+                     "specialDropCount":1,
                      "type":"spawnZone"
                     },
                  "propertytypes":
                     {
                      "count":"int",
                      "enemy":"string",
+                     "specialDrop":"string",
+                     "specialDropCount":"int",
                      "type":"string"
                     },
                  "rotation":0,
@@ -180,6 +186,27 @@
                  "width":211.5,
                  "x":1117.75,
                  "y":1166
+                }, 
+                {
+                 "height":48,
+                 "id":8,
+                 "name":"",
+                 "properties":
+                    {
+                     "item":"dungeonKeyGold",
+                     "type":"spawnItem"
+                    },
+                 "propertytypes":
+                    {
+                     "item":"string",
+                     "type":"string"
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":48,
+                 "x":2208,
+                 "y":576
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -187,7 +214,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":8,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.1.4",

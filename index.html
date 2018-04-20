@@ -38,35 +38,17 @@
         <!-- DATA SETS -->
         <script src="js/weapons/swords.js"></script>
         <script src="js/ai/enemies.js"></script>
+        <script src="js/loadLevels.js"></script>
 
         <!-- STATES -->
         <script src="js/boot.js"></script>
         <script src="js/mainMenu.js"></script>
         <script src="js/play.js"></script>
-
-        <!--
         <script src="js/gameSetup.js"></script>
-        -->
 
+        <!-- HAX -->
+        <script src="js/cheats.js"></script>
     </head>
     <body>
-
-
-    <script>
-        function startGame(){
-
-
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.src = "js/gameSetup.js";
-
-            window.setTimeout(function (){
-                document.getElementsByTagName("head")[0].appendChild(script);
-            },0);
-
-
-        }
-        startGame();
-    </script>
     </body>
 </html>

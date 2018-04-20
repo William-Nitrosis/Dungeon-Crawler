@@ -110,6 +110,7 @@ var playState = {
         findObjectsByType("playerExit", map).forEach(function(zone) {
             playerExitZone = game.add.sprite(zone.x, zone.y + zone.height, 'playerExitPoint');
             playerExitZone.keyType = zone.properties.keyType;
+            playerExitZone.nLevel = zone.properties.nLevel;
             playerExitZone.enableBody = true;
             game.physics.arcade.enable(playerExitZone);
             playerExitZones.add(playerExitZone);
@@ -148,7 +149,7 @@ var playState = {
         game.physics.arcade.collide(wallsLayer, enemies);
         game.physics.arcade.collide(wallsLayer, keys);
         game.physics.arcade.overlap(player, keys, collectKey, null, this, this);
-        game.physics.arcade.overlap(playerExitZones, player, endLevel);
+        game.physics.arcade.overlap(playerExitZones, player, endLevel, null, this, this);
         game.physics.arcade.overlap(enemies, player, damagePlayer, null, this);
         game.physics.arcade.overlap(enemies, playerWeapon, hitAi, null, this);
 

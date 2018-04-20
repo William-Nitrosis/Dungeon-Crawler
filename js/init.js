@@ -7,6 +7,7 @@ function spawnKey(point, key, vel) {
     dungeonKey.body.bounce.set(0.8);
     dungeonKey.body.drag.x = 100;
     dungeonKey.body.drag.y = 100;
+    dungeonKey.name = key;
     keys.add(dungeonKey);
 
     var keyDirection = game.rnd.integerInRange(1, 360);
@@ -16,7 +17,7 @@ function spawnKey(point, key, vel) {
 function updateKeyUI() {
     dungeonKeyGoldCount = 0;
     for (var i = 0; i <= player.keys.length; i++ ) {
-        if (player.keys[i] === "gold") {
+        if (player.keys[i] === "dungeonKeyGold") {
             dungeonKeyGoldCount++;
             dungeonKeyUI = game.add.sprite(448, 32, 'dungeonKeyGold');
             dungeonKeyUI.fixedToCamera = true;
@@ -33,17 +34,8 @@ function updateKeyUI() {
 
 function collectKey(player, key) {
     key.kill();
-    player.keys.push("gold");
+    player.keys.push("dungeonKeyGold");
     updateKeyUI();
-}
-
-function endLevel(player, zone) {
-    console.log(zone.keyType);
-    if (player.keys.includes(zone.keyType)) {
-        console.log("end");
-    } else {
-        console.log("no end");
-    }
 }
 
 function lineSight(line, range, enemy) {
@@ -216,10 +208,8 @@ function pathSetup(enemy) {
 function aiDead(enemy) {
     enemy.healthBar.kill();
     enemy.kill();
-    if (enemies.countLiving() === 6) {
-        spawnKey(enemy, "dungeonKeyGold", 150);
-    }
 }
+
 function xpToNextLevel(player) {
     var lvl = player.level + 1;
     return Math.round(((4 * Math.pow(lvl,3)) / 5) - player.xp);

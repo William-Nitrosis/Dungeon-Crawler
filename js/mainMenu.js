@@ -14,9 +14,10 @@ var mainMenuState = {
 
     },
     create: function (){
-        createButton(game.world.centerX, game.world.centerY -150, "New game", NewGameButton, this);
-        createButton(game.world.centerX, game.world.centerY -50, "Debugger mode", toggleDebugged, this);
-        createButton(game.world.centerX, game.world.centerY +50, "Options", openOptions, this);
+        var bOffSet = game.world.centerY * 0.2;
+        createButton(game.world.centerX, game.world.centerY * 0.6, "New game", NewGameButton, this);
+        createButton(game.world.centerX, game.world.centerY * 0.8, "Debugger mode", toggleDebugged, this);
+        createButton(game.world.centerX, game.world.centerY * 1.0, "Options", openOptions, this);
 
         var resStyle = { font: "18px Arial", fill: "#00ff00", align: "center"};
         resText = game.add.text(game.world.centerX, 30, ("Viewport res: \n" + canvasWidth + " x " + canvasHeight), resStyle);
