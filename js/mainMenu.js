@@ -12,7 +12,9 @@ var mainMenuState = {
             }, this);
         }
 
+        currentTime = new Date();
     },
+
     create: function (){
         var bOffSet = game.world.centerY * 0.2;
         createButton(game.world.centerX, game.world.centerY * 0.6, "New game", NewGameButton, this);
@@ -26,12 +28,15 @@ var mainMenuState = {
         resTextCurrent = game.add.text(game.world.centerX, 80, ("Current res: \n" + window.innerWidth + " x " + window.innerHeight), resStyle);
         resTextCurrent.anchor.setTo(0.5);
 
-
-
-
     },
+
     update: function (){
         resTextCurrent.setText("Current res: \n" + window.innerWidth + " x " + window.innerHeight);
+    },
+
+    render: function () {
+
+        game.debug.text('Elapsed seconds: ' + game.time.elapsedSecondsSince(currentTime), 32, 32);
     }
 
 };

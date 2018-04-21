@@ -2,8 +2,16 @@
 var playState = {
     preload: function () {
         game.load.tilemap('map', ('assets/tilesets/'+ loadLevel +'.json'), null, Phaser.Tilemap.TILED_JSON);
+
+        /* ================== PUSHING DATA ================== */
+        console.log('Options clicked: '+optionsClicked);
+        console.log('Debugger clicked: '+debuggerClicked);
+        console.log('Time spent on menu: '+game.time.elapsedSecondsSince(currentTime));
+
+
     },
     create: function (){
+        currentTime = new Date();
         // world setup
         game.world.setBounds(0, 0, 5000, 5000);
         game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -99,7 +107,6 @@ var playState = {
             // player xp
             player.xp = 60;
             player.level = 5;
-            console.log(xpToNextLevel(player));
         });
 
         // spawning exit
@@ -131,7 +138,7 @@ var playState = {
 
         // -- key text
         copperKeyText = game.add.text(317, 73, dungeonKeyCopperCount, dungeonKeyStyle);
-        bronzerKeyText = game.add.text(366, 73, dungeonKeyBronzeCount, dungeonKeyStyle);
+        bronzeKeyText = game.add.text(366, 73, dungeonKeyBronzeCount, dungeonKeyStyle);
         silverKeyText = game.add.text(411, 73, dungeonKeySilverCount, dungeonKeyStyle);
         goldKeyText = game.add.text(455, 73, dungeonKeyGoldCount, dungeonKeyStyle);
         platKeyText = game.add.text(500, 73, dungeonKeyPlatCount, dungeonKeyStyle);
@@ -268,6 +275,7 @@ var playState = {
                 game.debug.body(enemy);
             }, this);
         }
+        game.debug.text('Elapsed seconds: ' + game.time.elapsedSecondsSince(currentTime), 32, 32);
 
         // -- end debugging code
     }

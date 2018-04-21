@@ -25,7 +25,7 @@ function updateKeyUI() {
     }
 
     copperKeyText.setText(dungeonKeyCopperCount);
-    bronzerKeyText.setText(dungeonKeyBronzeCount);
+    bronzeKeyText.setText(dungeonKeyBronzeCount);
     silverKeyText.setText(dungeonKeySilverCount);
     goldKeyText.setText(dungeonKeyGoldCount);
     platKeyText.setText(dungeonKeyPlatCount);
@@ -167,8 +167,8 @@ function damagePlayer(x, src) {
         playerHitTimer.loop(500, function(){ playerInvulnerable = false; player.tint = 0xffffff; playerHitTimer.stop(true);});
         playerHitTimer.start();
     } else if (playerHealth <= 0) {
-        console.log("Player dead \n Health 0");
-        game.paused = true;
+        console.log('Time spent level: '+game.time.elapsedSecondsSince(currentTime));
+        game.state.start('boot');
     }
 }
 
@@ -234,6 +234,8 @@ function toggleDebugged(button) {
     } else if (!debugged) {
         button.setFrames(1);
     }
+
+    debuggerClicked = true;
 }
 
 function NewGameButton(){
@@ -245,6 +247,7 @@ function openOptions() {
     menuBackground.anchor.set(0.5);
     menuBackground.inputEnabled = true;
     menuBackgroundOpen = true;
+    optionsClicked = true;
 
 }
 

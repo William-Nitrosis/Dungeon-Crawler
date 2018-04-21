@@ -22,8 +22,7 @@ var dungeonKeyBronzeCount = 0;
 var dungeonKeySilverCount = 0;
 var dungeonKeyGoldCount = 0;
 var dungeonKeyPlatCount = 0;
-var copperKeyText, bronzerKeyText, silverKeyText, goldKeyText, platKeyText;
-
+var copperKeyText, bronzeKeyText, silverKeyText, goldKeyText, platKeyText;
 
 var isBusy = false; // defines if the player sprite is currently busy playing an animation
 var playerInvulnerable = false;
@@ -59,7 +58,14 @@ var playerHealthBar = healthbarConfig = {
 };
 
 
-/* ====== start mainMenu state ====== */
+/* ====== Main menu variables ====== */
 var  debugged, menuBackgroundOpen;
 
+/* ====== Tracking variables ====== */
+var optionsClicked = false;
+var debuggerClicked = false;
+var currentTime;
+var attempts = 0;
+
+/* ====== start mainMenu state ====== */
 game.state.start('boot');

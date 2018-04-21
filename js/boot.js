@@ -46,7 +46,27 @@ var loadState = {
         game.load.image('playerWeapon', playerWeaponStats.image);
     },
     create: function () {
+        isBusy = false; // defines if the player sprite is currently busy playing an animation
+        playerInvulnerable = false;
+        playerAttacking = false;
+
+        playerMovementSpeedMod = 1;
+        playerMovementSpeedBase = 200;
+        playerMovementSpeed = playerMovementSpeedMod * playerMovementSpeedBase;
+
+        playerAttackSpeedMod = 1;
+        playerAttackSpeedBase = 100;
+        playerAttackSpeed = playerAttackSpeedMod * playerAttackSpeedBase;
+
+        playerHealthMod = 1;
+        playerHealthBase = 100;
+        playerMaxHealth = playerHealthMod * playerHealthBase;
+        playerHealth = playerHealthMod * playerHealthBase;
+
+        attempts++;
+        console.log('Attempts: ' + attempts);
 
         game.state.start('mainMenu');
+
     }
 };
