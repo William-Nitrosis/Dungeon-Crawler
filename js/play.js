@@ -3,12 +3,6 @@ var playState = {
     preload: function () {
         game.load.tilemap('map', ('assets/tilesets/'+ loadLevel +'.json'), null, Phaser.Tilemap.TILED_JSON);
 
-        /* ================== PUSHING DATA ================== */
-        console.log('Options clicked: '+optionsClicked);
-        console.log('Debugger clicked: '+debuggerClicked);
-        console.log('Time spent on menu: '+game.time.elapsedSecondsSince(currentTime));
-
-
     },
     create: function (){
         currentTime = new Date();

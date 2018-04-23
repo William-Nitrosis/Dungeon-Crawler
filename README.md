@@ -14,7 +14,7 @@
     - Give the player XP and create the level sheet and modifier values
 - Create dungeon random generation engine
     - ~~Finish the object lay generation~~
-    - Implement different levels
+    - ~~Implement different levels~~
 - Add loot cards  
     - Add the loot cards into the game as a end of dungeon reward  
     - Design passive effects  
