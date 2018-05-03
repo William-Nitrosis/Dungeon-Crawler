@@ -168,7 +168,9 @@ function damagePlayer(x, src) {
         playerHitTimer.start();
     } else if (playerHealth <= 0) {
         console.log('Time spent level: '+game.time.elapsedSecondsSince(currentTime));
-        ga('send', 'event', 'DungeonCrawler', 'Next state', 'TimeOnLevel', game.time.elapsedSecondsSince(currentTime));
+        var tmpTime = game.time.elapsedSecondsSince(currentTime);
+        parseInt(tmpTime);
+        ga('send', 'event', 'DungeonCrawler', 'Next state', 'TimeOnLevel', tmpTime);
         game.state.start('boot');
     }
 }
@@ -246,7 +248,9 @@ function NewGameButton(){
     console.log('Debugger clicked: '+debuggerClicked);
     ga('send', 'event', 'DungeonCrawler', 'Next state', 'debuggerClicked', debuggerClicked);
     console.log('Time spent on menu: '+game.time.elapsedSecondsSince(currentTime));
-    ga('send', 'event', 'DungeonCrawler', 'Next state', 'TimeMenuScreen', game.time.elapsedSecondsSince(currentTime));
+    var tmpTime = game.time.elapsedSecondsSince(currentTime);
+    parseInt(tmpTime);
+    ga('send', 'event', 'DungeonCrawler', 'Next state', 'TimeMenuScreen', tmpTime);
     game.state.start('play');
 }
 
